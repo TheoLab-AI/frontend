@@ -80,7 +80,7 @@ export function Hero() {
 			{/* Footer meta — editorial pagination */}
 			<div className="container-brand relative flex items-end justify-between pb-8 text-meta text-[var(--color-fg-muted)]">
 				<span className="text-mono text-[0.7rem]">— HERO · 01.0</span>
-				<span className="text-mono text-[0.7rem]">2026 · CONFIDENTIAL</span>
+				<span className="text-mono text-[0.7rem]">2026 · THEOLAB</span>
 			</div>
 		</section>
 	);
