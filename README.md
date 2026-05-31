@@ -66,7 +66,7 @@ frontend/
 │   └── e2e/                    # Playwright smoke + screenshot tests
 ├── screenshots/                # Snapshots versionados v0.0.1+
 ├── public/
-│   └── brand/                  # PDFs Brand System + PNGs logos (confidential)
+│   └── brand/                  # PDFs Brand System + PNGs logos
 ├── DESIGN-DECISIONS.md         # Decisiones de stack/arquitectura (D1 output)
 ├── biome.json                  # Biome config (linter + formatter unificado)
 ├── playwright.config.ts        # Playwright config (desktop + mobile chromium)
