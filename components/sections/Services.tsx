@@ -19,7 +19,7 @@ const SERVICES: readonly Service[] = [
 		title: "Infraestructura IA",
 		summary:
 			"Diseño y operación de modelos, harnesses de evaluación y plataforma para inteligencia artificial.",
-		proof: "Harness v0.1.0 en producción — TheoLab-AI/harness@5681603",
+		proof: "Harness v0.1.0 en producción — TheoLab-AI/harness@7044c4f",
 		icon: Cpu,
 	},
 	{
@@ -35,7 +35,7 @@ const SERVICES: readonly Service[] = [
 		title: "Automatización y agentes",
 		summary:
 			"Implementaciones a medida y agentes de inteligencia artificial para operaciones empresariales críticas.",
-		proof: "Caso vivo · Asesora de Gases de Occidente",
+		proof: "Implementaciones a medida",
 		icon: Workflow,
 	},
 	{

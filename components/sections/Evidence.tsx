@@ -90,7 +90,7 @@ export function Evidence() {
 								<ArrowUpRight className="h-4 w-4" aria-hidden="true" />
 							</a>
 							<span className="text-mono text-[0.75rem] text-[var(--color-alabaster)]/50">
-								tag v0.1.0 · sha 5681603
+								tag v0.1.0 · sha 7044c4f
 							</span>
 						</div>
 						<p className="max-w-md text-body text-[var(--color-alabaster)]/70">
