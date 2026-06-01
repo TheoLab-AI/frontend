@@ -57,8 +57,9 @@
 **Modificar:**
 - `app/layout.tsx` — quitar el JSON-LD global (se mueve a la home); mantener html/body/fuentes/metadata base.
 - `app/page.tsx` — eliminar (su contenido se mueve al route group). *O* convertir en redirect interno si App Router lo exige; ver Task 4.
-- `components/sections/Hero.tsx` — subtitle de dos capas + puente a `/consultoria`.
-- `components/sections/Services.tsx` — eliminar el proof "Asesora de Gases de Occidente".
+- `components/sections/Hero.tsx` — subtitle de dos capas (literal en JSX, sin tocar el token) + puente a `/consultoria` (link editorial en la topline).
+- `components/sections/Services.tsx` — eliminar el proof "Asesora de Gases de Occidente" + actualizar el sha del harness en el item "01".
+- `components/sections/Evidence.tsx` — actualizar la referencia del harness: sha `5681603` (objeto-tag) → commit `7044c4f` (lo que marca v0.1.0).
 - `lib/seo.ts` — añadir `consultoriaServiceJsonLd()`.
 - `app/sitemap.ts`, `app/robots.ts` — añadir `/consultoria`.
 
@@ -373,8 +374,8 @@ git commit -m "refactor(layout): web de dos niveles — root neutro + route grou
 - Test: `tests/e2e/home.spec.ts` (extender)
 
 Cambios de contenido (sin tocar la animación ni el motivo editorial ya depurado `TL · 01 / 04`):
-- Subtitle: narrativa de dos capas. Texto: *"Empresa de adopción de IA empresarial. Plataforma agnóstica por diseño; entrada legal-first. Construimos infraestructura, modelos y agentes medibles."* (puede salir de `brand.subtitle` si se actualiza el token; si se actualiza el token, ajustar también `lib/seo.ts`/metadata que lo consumen).
-- Añadir CTA secundario que sea **puente**: `Button variant="outline" asChild` con `<Link href="/consultoria">` rotulado *"¿Dirige una firma legal?"*.
+- Subtitle: narrativa de dos capas. Texto: *"Empresa de adopción de IA empresarial. Plataforma agnóstica por diseño; entrada legal-first. Construimos infraestructura, modelos y agentes medibles."* **Como literal en el JSX del `Hero`. NO tocar el token `brand.subtitle`** — alimenta `description`/OG/twitter en `app/layout.tsx` y `organizationJsonLd` en `lib/seo.ts`; cambiarlo contaminaría el SEO institucional (decisión de validación H2).
+- Puente legal = **link editorial en la topline** (la misma fila que hoy muestra `TL · 01 / 04 · Inteligencia artificial aplicada · Colombia · 2026`), **NO un tercer botón** — evita dos `outline` compitiendo con el CTA de GitHub (decisión de validación H6). Sigue siendo un `<Link href="/consultoria">` cuyo texto incluye "firma legal" (p.ej. *"¿Dirige una firma legal? →"*), discreto (`text-meta`, color `--color-fg-muted` con hover a `--color-crimson`).
 
 - [ ] **Step 1: Extender el test e2e de la home** (en `tests/e2e/home.spec.ts`, dentro del `describe`):
 
@@ -388,28 +389,33 @@ test("ofrece puente a la landing legal", async ({ page }) => {
 ```
 
 - [ ] **Step 2: Run** `pnpm test:e2e tests/e2e/home.spec.ts` → FAIL (no existe el link).
-- [ ] **Step 3:** Implementar el cambio en `Hero.tsx`: añadir, junto al CTA actual, `<Button size="lg" variant="outline" asChild><Link href="/consultoria">¿Dirige una firma legal?<ArrowRight aria-hidden="true" /></Link></Button>` (importar `Link` de `next/link`). Ajustar el subtitle.
+- [ ] **Step 3:** Implementar el cambio en `Hero.tsx`: (a) en la fila editorial superior (la del `<span className="text-mono">TL · 01 / 04</span>`), añadir un `<Link href="/consultoria" className="...">¿Dirige una firma legal? →</Link>` discreto (`text-meta`, `--color-fg-muted`, hover `--color-crimson`) — **no un botón**; (b) reemplazar el subtitle que hoy renderiza `{brand.subtitle}` por el literal de dos capas (sin tocar el token). Importar `Link` de `next/link` (ya importado en el archivo).
 - [ ] **Step 4: Run** el test → PASS.
 - [ ] **Step 5: Commit** `feat(home): hero de dos capas + puente a /consultoria`.
 
 ---
 
-### Task 5: Refinar `Services` (eliminar caso no verificable)
+### Task 5: Coherencia de datos vivos (Services + Evidence)
 
 **Files:**
 - Modify: `components/sections/Services.tsx`
-- Test: `tests/e2e/coherence.spec.ts` (se crea en Task 15; aquí solo se elimina el dato)
+- Modify: `components/sections/Evidence.tsx`
+- Test: `tests/e2e/coherence.spec.ts` (se crea en Task 15; aquí solo se ajustan los datos)
 
-- [ ] **Step 1:** En `SERVICES`, en el item `index: "03"` (Automatización y agentes), reemplazar `proof: "Caso vivo · Asesora de Gases de Occidente"` por `proof: "Implementaciones a medida · pipeline abierto"`.
+Cubre la tarea derivada #2 del spec (verificar Evidence) + H1 (sha) + el caso no verificable. **Hecho empírico ya verificado:** el commit que marca `v0.1.0` es `7044c4f`; `5681603` es el sha del objeto-tag anotado (lo que un lector reproduce con `git checkout v0.1.0` es `7044c4f`). Las métricas `0.975 / 0.675 / 0.091` ya están verificadas contra el bundle inmutable `evals/reports/h2-iter-1-fuzzy-20260524-195725/` — **no se tocan**.
+
+- [ ] **Step 1a — Services:** en `SERVICES`, item `index: "03"` (Automatización y agentes), reemplazar `proof: "Caso vivo · Asesora de Gases de Occidente"` por un proof neutro/verificable que **no** duplique "pipeline abierto" del item "04" (p.ej. `proof: "Implementaciones a medida"`).
+- [ ] **Step 1b — Services:** en el item `index: "01"` (Infraestructura IA), cambiar `proof: "Harness v0.1.0 en producción — TheoLab-AI/harness@5681603"` → `…/harness@7044c4f`.
+- [ ] **Step 1c — Evidence:** en la fila de citación, cambiar `tag v0.1.0 · sha 5681603` → `tag v0.1.0 · sha 7044c4f`.
 - [ ] **Step 2: Run** `pnpm typecheck && pnpm vitest run` → PASS (sin regresiones).
 - [ ] **Step 3: Run** búsqueda de coherencia:
 
 ```bash
-grep -rn "Gases de Occidente" components app && echo "RESIDUO" || echo "LIMPIO"
+grep -rn "Gases de Occidente\|5681603" components app && echo "RESIDUO" || echo "LIMPIO"
 ```
 Expected: `LIMPIO`.
 
-- [ ] **Step 4: Commit** `fix(home): retirar caso no verificable de Services (tracción cero declarada)`.
+- [ ] **Step 4: Commit** `fix(home): coherencia de datos del harness (retirar caso no verificable + sha del commit v0.1.0)`.
 
 ---
 
@@ -715,10 +721,11 @@ test.describe("Coherencia del front", () => {
     await expect(page.getByRole("link", { name: "Filosofía" })).toHaveCount(0);
   });
 
-  test("la home no muestra el caso no verificable", async ({ page }) => {
+  test("la home no muestra datos muertos (caso no verificable ni sha del objeto-tag)", async ({ page }) => {
     await page.goto("/");
     const body = (await page.locator("body").textContent()) ?? "";
     expect(body).not.toContain("Gases de Occidente");
+    expect(body).not.toContain("5681603"); // sha del objeto-tag; el commit de v0.1.0 es 7044c4f (H1)
   });
 
   test("/consultoria expone el CTA de WhatsApp correcto", async ({ page }) => {
@@ -783,6 +790,7 @@ test.describe("Landing /consultoria — smoke", () => {
 | Enfoque A: root neutro + route group sin nav común | Task 3 |
 | Home institucional refinada (dos capas, puente legal) | Task 4 |
 | Eliminar "Gases de Occidente" | Task 5 + gate Task 15 |
+| Coherencia sha harness (commit `7044c4f` en Evidence + Services) | Task 5 + gate Task 15 |
 | `/consultoria`: 7 secciones (header, hero, problema, valor, oferta, propiedad, CTA, footer) | Tasks 6-12 |
 | Voz formal + sin "harness" en `/consultoria` | Tasks 6-11 + gate Task 15 |
 | Precios públicos $500k/$1.5M, fundador interno | Task 9 (+ test) |
