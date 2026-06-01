@@ -32,6 +32,13 @@ test.describe("TheoLab home — smoke", () => {
 		expect(content).toContain("Organization");
 	});
 
+	test("ofrece puente a la landing legal", async ({ page }) => {
+		await page.goto("/");
+		const bridge = page.getByRole("link", { name: /firma legal/i });
+		await expect(bridge.first()).toBeVisible();
+		await expect(bridge.first()).toHaveAttribute("href", "/consultoria");
+	});
+
 	test("no console errors on load", async ({ page }) => {
 		const errors: string[] = [];
 		page.on("console", (msg) => {
