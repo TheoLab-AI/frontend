@@ -177,7 +177,7 @@ frontend/
 | Vercel AI Gateway + AI SDK | Si añadimos chat/agente IA en frontend (demos del harness). |
 | Lenis smooth scroll | Solo si CSS scroll-driven nativo no basta. |
 | Vercel Marketplace (Clerk, etc.) | Cuando auth/multitenancy entre en scope. |
-| Dominio custom theolab.ai | Cuando se valide compra + DNS. |
+| Dominio custom theolab.tech | Adquirido (Hostinger). Conectar a Vercel vía A/CNAME — no romper los MX de Google Workspace. |
 
 ## 7. Delivery v0.0.1 — alcance de sesión D
 

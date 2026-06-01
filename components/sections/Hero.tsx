@@ -30,7 +30,7 @@ export function Hero() {
 						variants={fadeUp}
 						className="flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-[var(--color-fg-muted)]"
 					>
-						<span className="text-mono text-[0.7rem]">PL · 01 / 04</span>
+						<span className="text-mono text-[0.7rem]">TL · 01 / 04</span>
 						<span aria-hidden="true">·</span>
 						<span>Inteligencia artificial aplicada</span>
 						<span aria-hidden="true">·</span>

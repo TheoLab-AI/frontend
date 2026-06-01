@@ -119,7 +119,7 @@ Items definidos en `DESIGN-DECISIONS.md` sección 6 — activar bajo demanda:
 - Sentry + PostHog (cuando haya tráfico real)
 - Contentlayer / Velite (cuando aterrice primer post MDX)
 - Vercel AI Gateway + AI SDK (demos del harness en frontend)
-- Dominio custom `theolab.ai`
+- Dominio custom `theolab.tech` (adquirido — conectar a Vercel)
 
 ## License
 
