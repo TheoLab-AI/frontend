@@ -39,6 +39,22 @@ test.describe("TheoLab home — smoke", () => {
 		await expect(bridge.first()).toHaveAttribute("href", "/consultoria");
 	});
 
+	test("muestra los planes con precios públicos", async ({ page }) => {
+		await page.goto("/");
+		await expect(page.locator("#oferta")).toBeVisible();
+		const body = (await page.locator("body").textContent()) ?? "";
+		expect(body).toContain("$500.000");
+		expect(body).toContain("$1.500.000");
+	});
+
+	test("ofrece el CTA directo y la propiedad del cliente", async ({ page }) => {
+		await page.goto("/");
+		await expect(page.locator("#propiedad-cliente")).toBeVisible();
+		await expect(page.locator("#home-cta")).toBeVisible();
+		const wa = page.getByRole("link", { name: /whatsapp/i }).first();
+		await expect(wa).toHaveAttribute("href", /wa\.me\/573182395252/);
+	});
+
 	test("no console errors on load", async ({ page }) => {
 		const errors: string[] = [];
 		page.on("console", (msg) => {

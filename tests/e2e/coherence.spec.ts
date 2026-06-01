@@ -26,6 +26,12 @@ test.describe("Coherencia del front", () => {
 		expect(body).not.toContain("5681603"); // sha del objeto-tag; el commit de v0.1.0 es 7044c4f (H1)
 	});
 
+	test("la home no expone el precio fundador (interno)", async ({ page }) => {
+		await page.goto("/");
+		const body = (await page.locator("body").textContent()) ?? "";
+		expect(body).not.toContain("$200.000");
+	});
+
 	test("/consultoria expone el CTA de WhatsApp correcto", async ({ page }) => {
 		await page.goto("/consultoria");
 		const wa = page.getByRole("link", { name: /whatsapp/i }).first();
