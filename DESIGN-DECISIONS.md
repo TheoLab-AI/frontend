@@ -1,6 +1,6 @@
 # DESIGN DECISIONS — TheoLab Frontend v0.0.1
 
-> **Sesión D · 2026-05-26** · Output del Bloque D1 del [KICKOFF-D-FRONTEND.md](../../sistema-ops/KICKOFFS/KICKOFF-D-FRONTEND.md).
+> **Sesión D · 2026-05-26** · Output del Bloque D1 del KICKOFF-D-FRONTEND.md (archivado en docs/ops/coordinacion/archive/ciclo-2026-05-26/).
 > **Objetivo del documento**: registrar las decisiones de stack, arquitectura, copy y delivery acordadas con el usuario en el brainstorming D1, para que D2/D3/D4 ejecuten sin re-litigar.
 
 ## 1. Identidad del producto
@@ -187,7 +187,7 @@ frontend/
 - [ ] D4: Smoke test + Playwright snapshot + screenshot inicial.
 - [ ] D5: Repo `TheoLab-AI/frontend` **PRIVADO** + push.
 - [ ] D6: Vercel link + preview deploy.
-- [ ] REPORT-D-frontend.md en `~/sistema-ops/KICKOFFS/`.
+- [ ] REPORT-D-frontend.md (histórico, archivado en docs/ops/coordinacion/archive/ciclo-2026-05-26/).
 
 ## 8. Decisiones cerradas (referencia rápida)
 
