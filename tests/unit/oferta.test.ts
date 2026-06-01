@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { STEPS } from "@/lib/oferta";
+import { ofertaJsonLd } from "@/lib/seo";
 
 describe("oferta", () => {
 	it("expone los tres peldaños del embudo", () => {
@@ -17,5 +18,12 @@ describe("oferta", () => {
 	});
 	it("NO incluye el precio fundador en ningún lado", () => {
 		expect(JSON.stringify(STEPS)).not.toContain("$200.000");
+	});
+	it("ofertaJsonLd emite los Offer en COP desde la fuente única", () => {
+		const ld = ofertaJsonLd();
+		const precios = ld.offers.map((o) => o.price);
+		expect(precios).toContain("500000");
+		expect(precios).toContain("1500000");
+		expect(JSON.stringify(ld)).not.toContain("200000");
 	});
 });
