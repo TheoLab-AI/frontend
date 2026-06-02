@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactElement } from "react";
 import { fadeUp, stagger } from "@/components/motion/variants";
+import { contact, mailtoUrl, whatsappUrl } from "@/lib/contact";
 
 /* =========================================================================
  * F07 · CTA final
@@ -11,6 +12,10 @@ import { fadeUp, stagger } from "@/components/motion/variants";
  * Cierre con dos canales: WhatsApp + correo. Copy literal del prototipo
  * HTML v3. Tema onyx para break contra las secciones alabaster previas y
  * cerrar con peso.
+ *
+ * Los datos de contacto y los URL builders vienen de `lib/contact.ts`
+ * (fuente única que también consumen ContactCTA y el JSON-LD del home),
+ * para evitar duplicar el número de WhatsApp / email entre componentes.
  * ========================================================================= */
 
 interface CtaCard {
@@ -24,16 +29,16 @@ interface CtaCard {
 const CTA_CARDS: readonly CtaCard[] = [
 	{
 		label: "Por WhatsApp",
-		value: "+57 XXX XXX XXXX",
+		value: contact.whatsapp.display,
 		cap: "Respuesta el mismo día.",
-		href: "https://wa.me/57XXXXXXXXXX?text=Hola%2C%20quiero%20agendar%20la%20reuni%C3%B3n%20de%20introducci%C3%B3n%20para%20mi%20firma.",
+		href: whatsappUrl("Hola, quiero agendar la reunión de introducción para mi firma."),
 		external: true,
 	},
 	{
 		label: "Por correo",
-		value: "admin@theolab.tech",
+		value: contact.email,
 		cap: "Respuesta en menos de 24 horas.",
-		href: "mailto:admin@theolab.tech?subject=Reuni%C3%B3n%20de%20introducci%C3%B3n%20%E2%80%94%20TheoLab",
+		href: mailtoUrl("Reunión de introducción — TheoLab"),
 		external: false,
 	},
 ] as const;

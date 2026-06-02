@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-const FORBIDDEN_IN_CONSULTORIA = ["harness", "theolab.ai", "PL ·", "15–30", "15-30", "$200.000"];
+// `$200.000` ya no está prohibido en /consultoria — el rediseño v3 expone el
+// split regular/fundador del embudo (PR4) y la edición fundadora es pública
+// hasta que se llenen los 10 cupos.
+const FORBIDDEN_IN_CONSULTORIA = ["harness", "theolab.ai", "PL ·", "15–30", "15-30"];
 
 test.describe("Coherencia del front", () => {
 	test("/consultoria no filtra lenguaje técnico ni datos muertos", async ({ page }) => {
