@@ -34,8 +34,9 @@ const buttonVariants = cva(
 					"hover:bg-[var(--color-bg-elevated)]",
 				].join(" "),
 				accent: [
-					"bg-[var(--color-crimson)] text-[var(--color-alabaster)]",
-					"hover:bg-[var(--color-burgundy)]",
+					"bg-[linear-gradient(90deg,var(--color-crimson)_0%,oklch(0.72_0.2_60)_50%,var(--color-gold)_100%)]",
+					"text-[var(--color-onyx)] font-semibold",
+					"hover:brightness-95",
 					"active:translate-y-[1px]",
 				].join(" "),
 			},
