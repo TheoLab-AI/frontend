@@ -3,11 +3,14 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
 import { fadeUp, stagger } from "@/components/motion/variants";
+import { TextShimmer } from "@/components/ui/TextShimmer";
 
 interface Metric {
 	label: string;
 	value: string;
 	hint: string;
+	/** Optional accent — render label via TextShimmer to draw the eye once per viewport. */
+	accent?: boolean;
 }
 
 const METRICS: readonly Metric[] = [
@@ -15,6 +18,7 @@ const METRICS: readonly Metric[] = [
 		label: "Coverage",
 		value: "0.975",
 		hint: "% generación válida",
+		accent: true,
 	},
 	{
 		label: "Strict pass",
@@ -114,7 +118,15 @@ function MetricCard({ metric }: { metric: Metric }) {
 				min-h-[180px]
 			"
 		>
-			<span className="text-meta text-[var(--color-alabaster)]/60">{metric.label}</span>
+			<span className="text-meta text-[var(--color-alabaster)]/60">
+				{metric.accent ? (
+					<TextShimmer variant="brand" asChild>
+						<span>{metric.label}</span>
+					</TextShimmer>
+				) : (
+					metric.label
+				)}
+			</span>
 			<span className="text-display [font-family:var(--font-display)] font-bold text-brand-gradient leading-none">
 				{metric.value}
 			</span>
