@@ -23,6 +23,11 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@radix-ui/react-separator": "^1.1.8",
 		"@radix-ui/react-slot": "^1.2.4",
+		"@react-three/drei": "^10.7.7",
+		"@react-three/fiber": "^9.6.1",
+		"@react-three/postprocessing": "^3.0.4",
+		"@splinetool/react-spline": "^4.1.0",
+		"@splinetool/runtime": "^1.12.95",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"lucide-react": "^1.16.0",
@@ -30,7 +35,8 @@
 		"next": "16.2.6",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
-		"tailwind-merge": "^3.6.0"
+		"tailwind-merge": "^3.6.0",
+		"three": "^0.184.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
@@ -41,6 +47,7 @@
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"@types/three": "^0.184.1",
 		"@vitest/ui": "^4.1.7",
 		"husky": "^9.1.7",
 		"jsdom": "^29.1.1",
