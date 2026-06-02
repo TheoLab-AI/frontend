@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
-import { SiteHeader } from "@/components/sections/SiteHeader";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { organizationJsonLd, servicesJsonLd } from "@/lib/seo";
 import { brand } from "@/lib/tokens";
 import "./globals.css";
 
@@ -86,12 +83,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="es-CO" className={`${inter.variable} ${interTight.variable}`}>
-			<body className="flex min-h-dvh flex-col font-sans antialiased">
-				<JsonLd id="ld-organization" data={organizationJsonLd()} />
-				<JsonLd id="ld-services" data={servicesJsonLd()} />
-				<SiteHeader />
-				{children}
-			</body>
+			<body className="flex min-h-dvh flex-col font-sans antialiased">{children}</body>
 		</html>
 	);
 }

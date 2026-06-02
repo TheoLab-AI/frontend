@@ -44,7 +44,7 @@ export const brand = {
 	name: "TheoLab",
 	tagline: "Tú sabes el qué — nosotros traemos el cómo.",
 	subtitle: "Infraestructura, modelos y adopción de IA para empresas que ya saben dónde van.",
-	domain: "theolab.ai",
+	domain: "theolab.tech",
 	github: "https://github.com/TheoLab-AI",
 	locale: "es-CO",
 } as const;

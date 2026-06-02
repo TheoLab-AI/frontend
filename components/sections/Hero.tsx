@@ -30,11 +30,18 @@ export function Hero() {
 						variants={fadeUp}
 						className="flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-[var(--color-fg-muted)]"
 					>
-						<span className="text-mono text-[0.7rem]">PL · 01 / 04</span>
+						<span className="text-mono text-[0.7rem]">TL · 01 / 04</span>
 						<span aria-hidden="true">·</span>
 						<span>Inteligencia artificial aplicada</span>
 						<span aria-hidden="true">·</span>
 						<span>Colombia · 2026</span>
+						<span aria-hidden="true">·</span>
+						<Link
+							href="/consultoria"
+							className="text-meta text-[var(--color-fg-muted)] transition-colors hover:text-[var(--color-crimson)]"
+						>
+							¿Dirige una firma legal? →
+						</Link>
 					</motion.div>
 
 					{/* Wordmark */}
@@ -56,7 +63,8 @@ export function Hero() {
 						variants={fadeUp}
 						className="text-body-lg max-w-2xl text-[var(--color-fg-muted)] [text-wrap:pretty]"
 					>
-						{brand.subtitle}
+						Empresa de adopción de IA empresarial. Plataforma agnóstica por diseño; entrada
+						legal-first. Construimos infraestructura, modelos y agentes medibles.
 					</motion.p>
 
 					{/* CTAs */}

@@ -1,3 +1,4 @@
+import { STEPS } from "@/lib/oferta";
 import { brand } from "@/lib/tokens";
 
 export function organizationJsonLd() {
@@ -45,4 +46,36 @@ export function servicesJsonLd() {
 		description: s.description,
 		areaServed: { "@type": "Country", name: "Colombia" },
 	}));
+}
+
+export function ofertaJsonLd() {
+	const consultoria = STEPS.find((s) => s.name === "Consultoría");
+	const offers = (consultoria?.options ?? []).map((o) => ({
+		"@type": "Offer",
+		name: `Consultoría ${o.label.toLowerCase()}`,
+		price: o.price.replace(/[^0-9]/g, ""),
+		priceCurrency: "COP",
+	}));
+	return {
+		"@context": "https://schema.org",
+		"@type": "Service",
+		serviceType: "Adopción de IA empresarial",
+		provider: { "@type": "Organization", name: brand.name },
+		areaServed: { "@type": "Country", name: "Colombia" },
+		offers,
+	};
+}
+
+export function consultoriaServiceJsonLd() {
+	return {
+		"@context": "https://schema.org",
+		"@type": "Service",
+		serviceType: "Consultoría de adopción de IA para firmas legales",
+		provider: { "@type": "Organization", name: brand.name },
+		areaServed: { "@type": "Country", name: "Colombia" },
+		offers: [
+			{ "@type": "Offer", name: "Consultoría inicial", price: "500000", priceCurrency: "COP" },
+			{ "@type": "Offer", name: "Consultoría completa", price: "1500000", priceCurrency: "COP" },
+		],
+	} as const;
 }
