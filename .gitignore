@@ -53,3 +53,6 @@ public/models/robot-original.glb
 
 # Backup local del GLB anterior sin rig (14 MB, no producción)
 public/models/robot-static.glb
+
+# Claude Code: per-user local settings (not project-scope)
+.claude/settings.local.json
