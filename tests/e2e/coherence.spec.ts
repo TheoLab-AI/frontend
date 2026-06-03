@@ -31,10 +31,10 @@ test.describe("Coherencia del front", () => {
 		expect(body).not.toContain("5681603"); // sha del objeto-tag; el commit de v0.1.0 es 7044c4f (H1)
 	});
 
-	test("la home no expone el precio fundador (interno)", async ({ page }) => {
+	test("la home expone el precio fundador (edición fundadora pública)", async ({ page }) => {
 		await page.goto("/");
 		const body = (await page.locator("body").textContent()) ?? "";
-		expect(body).not.toContain("$200.000");
+		expect(body).toContain("$200.000");
 	});
 
 	test("/consultoria-legal expone el CTA de WhatsApp correcto", async ({ page }) => {
