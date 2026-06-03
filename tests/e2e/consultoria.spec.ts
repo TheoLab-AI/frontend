@@ -3,8 +3,10 @@ import { expect, test } from "@playwright/test";
 test.describe("Landing /consultoria — smoke", () => {
 	test("carga con header, hero, secciones v3 y footer", async ({ page }) => {
 		await page.goto("/consultoria");
-		// Header con navegación + CTA del header (no Header viejo de Alexis)
-		await expect(page.getByRole("link", { name: /agendar reunión/i })).toBeVisible();
+		// Header v3 presente (landmark navigation "Consultoría") en todos los
+		// breakpoints. En móvil el CTA "Agendar reunión" vive dentro del menú
+		// colapsado (Radix Dialog); el CTA queda cubierto por el test de #cta.
+		await expect(page.getByRole("navigation", { name: "Consultoría" })).toBeVisible();
 		// Hero: la copy editorial "Usted sabe el qué. Nosotros, el cómo."
 		// queda visible (Hero Splite carga el Spline en lg+ pero la copy es
 		// estática en todos los breakpoints).
