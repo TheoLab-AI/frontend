@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Backup local del GLB original sin optimizar (no producción, ver SESSION-HANDOFF-R3F)
 public/models/robot-original.glb
+
+# Backup local del GLB anterior sin rig (14 MB, no producción)
+public/models/robot-static.glb
