@@ -47,7 +47,7 @@ export default function HeroR3FPoc(): ReactElement {
 					outputColorSpace: THREE.SRGBColorSpace,
 					powerPreference: "high-performance",
 				}}
-				camera={{ position: [0, 0.4, 3.2], fov: 35 }}
+				camera={{ position: [0, 1.05, 1.85], fov: 32 }}
 				shadows
 			>
 				{/* Iluminacion 3-point reposicionada:
@@ -67,8 +67,8 @@ export default function HeroR3FPoc(): ReactElement {
 
 				<Suspense fallback={null}>
 					<Environment preset="city" background={false} />
-					{/* Pivot del GLB sale rotado 90° en Y — corregimos aqui para que mire a la camara */}
-					<group rotation={[0, -Math.PI / 2, 0]}>
+					{/* GLB rigged de Prism viene mirando +Z natural — sin rotacion extra */}
+					<group rotation={[0, 0, 0]}>
 						<Robot />
 					</group>
 					<ContactShadows
@@ -84,9 +84,9 @@ export default function HeroR3FPoc(): ReactElement {
 				<OrbitControls
 					enablePan={false}
 					enableZoom={true}
-					minDistance={1.8}
-					maxDistance={6}
-					target={[0, 0.2, 0]}
+					minDistance={1.4}
+					maxDistance={5}
+					target={[0, 1.0, 0]}
 				/>
 
 				<EffectComposer multisampling={4}>
