@@ -203,6 +203,14 @@ frontend/
 | Deploy | Vercel team `alexis-projects-2b7b8f2f` hobby tier |
 | Brand wordmark | "TheoLab" (NO PrometheusLab) |
 
+## 9. ADRs en línea — desviaciones post-v0.0.1
+
+### ADR-F1 (2026-06-03) — Hero 3D con React Three Fiber activado en `/consultoria`
+Se activó el expansion path de §6 (R3F + WebGPU "si decidimos hero 3D"). El Hero de `/consultoria` migró de Spline a **React Three Fiber** (`three` + `@react-three/fiber` + `drei` + `postprocessing`) con un robot GLB riggeado. Se validó primero en un POC aislado (`/consultoria/r3f-poc`). `HeroSplite.tsx` se conserva como fallback 1-2 sprints. Detalle: `docs/SESSION-HANDOFF-2026-06-02-R3F-*.md`. Deuda: el bone `tripo::Head_0` no se halla en runtime → LookAt deshabilitado (warning no-fatal). Autor: Juan José Gómez (PR #2/#3).
+
+### ADR-F2 (2026-06-03) — TD-3 reabierta: la edición fundadora es pública
+Decisión de empresa (opción B): el precio fundador ($200.000 / $1.200.000) **deja de ser interno** y se expone públicamente — visible en la UI de `/consultoria` (`OfferLadderV3`, split regular/fundador) y en el JSON-LD (home + consultoría). Implementación: fuente única `lib/oferta.ts` con `founderPrice`; helper compartido `consultoriaOffers()` en `lib/seo.ts` deriva los offers para ambas superficies (gate de consistencia preservado). Reemplaza la TD-3 previa ("fundador interno, no en la web"). Pendiente: reflejarlo en la doc de estrategia (`docs/strategy/modelo-negocio.md`).
+
 ---
 
 **Aprobación:** este documento queda como fuente de verdad para D2-D6. Cualquier desviación se anota como ADR en línea o en este mismo doc.
