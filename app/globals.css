@@ -205,3 +205,60 @@
 	margin-inline: auto;
 	padding-inline: var(--container-pad);
 }
+
+/* Spotlight animation — used by components/ui/Spotlight.tsx */
+@utility animate-spotlight {
+	animation: spotlight 2s ease 0.75s 1 forwards;
+}
+
+@keyframes spotlight {
+	0% {
+		opacity: 0;
+		transform: translate(-72%, -62%) scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: translate(-50%, -40%) scale(1);
+	}
+}
+
+/* Text shimmer — brand (slate→gold→slate) and crimson (Golden Hour completa) */
+@utility text-shimmer-brand {
+	background: linear-gradient(
+		90deg,
+		var(--color-fg-muted) 0%,
+		var(--color-gold) 50%,
+		var(--color-fg-muted) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+	animation: shimmer-slide var(--shimmer-duration, 2.4s) linear infinite;
+}
+
+@utility text-shimmer-crimson {
+	background: linear-gradient(
+		90deg,
+		var(--color-burgundy) 0%,
+		var(--color-crimson) 50%,
+		var(--color-gold) 100%,
+		var(--color-burgundy) 150%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+	animation: shimmer-slide var(--shimmer-duration, 3s) linear infinite;
+}
+
+@keyframes shimmer-slide {
+	from {
+		background-position: 200% 0;
+	}
+	to {
+		background-position: -200% 0;
+	}
+}

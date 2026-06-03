@@ -50,12 +50,28 @@ export function servicesJsonLd() {
 
 export function ofertaJsonLd() {
 	const consultoria = STEPS.find((s) => s.name === "Consultoría");
-	const offers = (consultoria?.options ?? []).map((o) => ({
-		"@type": "Offer",
-		name: `Consultoría ${o.label.toLowerCase()}`,
-		price: o.price.replace(/[^0-9]/g, ""),
-		priceCurrency: "COP",
-	}));
+	const options = consultoria?.options ?? [];
+	// Emitimos ambos Offers (regular + fundador) cuando el tier fundador
+	// está activo. Cuando la edición fundadora cierre (founderPrice ausente),
+	// el JSON-LD volverá a emitir solo el precio regular sin tocar nada.
+	const offers = options.flatMap((o) => {
+		const base = {
+			"@type": "Offer" as const,
+			name: `Consultoría ${o.label.toLowerCase()}`,
+			price: o.price.replace(/[^0-9]/g, ""),
+			priceCurrency: "COP",
+		};
+		if (!o.founderPrice) return [base];
+		return [
+			base,
+			{
+				"@type": "Offer" as const,
+				name: `Consultoría ${o.label.toLowerCase()} — Fundador`,
+				price: o.founderPrice.replace(/[^0-9]/g, ""),
+				priceCurrency: "COP",
+			},
+		];
+	});
 	return {
 		"@context": "https://schema.org",
 		"@type": "Service",

@@ -11,11 +11,16 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/consultoria" },
 };
 
+// Cupos restantes de la edición fundadora. Hoy hardcodeado a 3 mientras no
+// haya conteo real (Firestore/API); cuando exista, pasar a un Server
+// Component que lo consulte o expose un context client-side.
+const SPOTS_LEFT = 3;
+
 export default function ConsultoriaLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			<JsonLd id="ld-consultoria" data={consultoriaServiceJsonLd()} />
-			<ConsultoriaHeader />
+			<ConsultoriaHeader spotsLeft={SPOTS_LEFT} />
 			{children}
 			<ConsultoriaFooter />
 		</>
