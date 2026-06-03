@@ -37,7 +37,7 @@ export function Hero() {
 						<span>Colombia · 2026</span>
 						<span aria-hidden="true">·</span>
 						<Link
-							href="/consultoria"
+							href="/consultoria-legal"
 							className="text-meta text-[var(--color-fg-muted)] transition-colors hover:text-[var(--color-crimson)]"
 						>
 							¿Dirige una firma legal? →

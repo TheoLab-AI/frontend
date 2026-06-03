@@ -10,9 +10,9 @@ describe("HomeCTA", () => {
 		// (coherente con el e2e de Task 8: /wa\.me\/573182395252/).
 		expect(wa.getAttribute("href")).toMatch(/^https:\/\/wa\.me\/573182395252/);
 	});
-	it("ofrece el puente a /consultoria", () => {
+	it("ofrece el puente a /consultoria-legal", () => {
 		render(<HomeCTA />);
 		const bridge = screen.getByRole("link", { name: /firma legal/i });
-		expect(bridge).toHaveAttribute("href", "/consultoria");
+		expect(bridge).toHaveAttribute("href", "/consultoria-legal");
 	});
 });

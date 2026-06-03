@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 	title: "Consultoría de IA para firmas legales",
 	description:
 		"Recupere entre 18 y 27 horas profesionales al mes, medidas. Consultoría de IA para firmas legales colombianas.",
-	alternates: { canonical: "/consultoria" },
+	alternates: { canonical: "/consultoria-legal" },
 };
 
 // Cupos restantes de la edición fundadora. Hoy hardcodeado a 3 mientras no

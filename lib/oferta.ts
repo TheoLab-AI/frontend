@@ -22,7 +22,7 @@ export interface Step {
 }
 
 /**
- * Fuente única del embudo. La consumen OfferLadder (/consultoria + home) y
+ * Fuente única del embudo. La consumen OfferLadder (/consultoria-legal + home) y
  * ofertaJsonLd. La edición fundadora ofrece descuento a los primeros 10
  * clientes; mientras `founderPrice` esté presente, el embudo muestra split
  * regular vs fundador y el JSON-LD emite ambos Offers.

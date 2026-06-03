@@ -12,7 +12,7 @@ import { TextShimmer } from "@/components/ui/TextShimmer";
 /* =========================================================================
  * HeroR3F — Hero de producción · Fase 3 R3F
  *
- * Reemplaza HeroSplite.tsx en /consultoria. Mantiene la ARQUITECTURA VISUAL
+ * Reemplaza HeroSplite.tsx en /consultoria-legal. Mantiene la ARQUITECTURA VISUAL
  * (Card variant=dark, Spotlight gold upper-left, HeroVeil de legibilidad,
  * layout split 50/50 en lg, pills + banner reactivo), pero cambia:
  *

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { ReactElement } from "react";
 import { Button } from "@/components/ui/Button";
 import { Navbar, type NavbarItem } from "@/components/ui/Navbar";
@@ -9,27 +8,25 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { brand } from "@/lib/tokens";
 
 /* =========================================================================
- * SiteHeader — Global compositor for the marketing surface.
+ * SiteHeader — Compositor global de la superficie institucional.
  *
- * Mounts the editorial Navbar primitive (alabaster theme, light scheme)
- * with the standard home anchors + a link to /diagnostico.
+ * Monta la primitiva Navbar (tema alabaster) con las anclas del home + el
+ * enlace a la landing legal `/consultoria-legal` (puerta de entrada activa
+ * y estable para socios de firmas legales).
  *
- * Guard: /diagnostico mounts its own <DiagnosticoHeader/> inline in its
- * page.tsx (different anchors + Status slot for CUPOS). To avoid double
- * headers stacking at z-40, this compositor returns null on that route.
- *
- * The guard is client-side (usePathname) — Layout injects this unconditionally
- * and the component itself decides whether to render.
+ * `/consultoria-legal` vive fuera del route group (institucional) y monta su
+ * propio <ConsultoriaHeader/>, así que no hay headers apilados: este
+ * compositor solo se inyecta en el layout institucional.
  * ========================================================================= */
 
 const items: readonly NavbarItem[] = [
 	{ href: "#services", label: "Servicios" },
 	{ href: "#evidence", label: "Evidencia" },
 	{ href: "#philosophy", label: "Filosofía" },
-	{ href: "/diagnostico", label: "Diagnóstico" },
+	{ href: "/consultoria-legal", label: "Consultoría legal" },
 ];
 
-// Only hash hrefs are observed by IntersectionObserver — route hrefs are skipped.
+// Solo las anclas hash las observa el IntersectionObserver — las rutas se omiten.
 const anchors = items.filter((i) => i.href.startsWith("#")).map((i) => i.href);
 
 const Brand = (): ReactElement => <Wordmark size="sm" />;
@@ -42,14 +39,7 @@ const CTA = (): ReactElement => (
 	</Button>
 );
 
-export function SiteHeader(): ReactElement | null {
-	const pathname = usePathname();
-
-	// /diagnostico mounts its own header inline — bail out to avoid stacking.
-	if (pathname?.startsWith("/diagnostico")) {
-		return null;
-	}
-
+export function SiteHeader(): ReactElement {
 	return (
 		<Navbar.Root theme="alabaster" anchors={anchors} ariaLabel="Principal">
 			<Navbar.Brand>

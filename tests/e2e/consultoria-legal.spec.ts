@@ -1,8 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Landing /consultoria — smoke", () => {
-	test("carga con header, hero, secciones v3 y footer", async ({ page }) => {
+test.describe("Landing /consultoria-legal — smoke", () => {
+	test("la ruta vieja /consultoria redirige (301) a /consultoria-legal", async ({ page }) => {
 		await page.goto("/consultoria");
+		await expect(page).toHaveURL(/\/consultoria-legal$/);
+	});
+
+	test("carga con header, hero, secciones v3 y footer", async ({ page }) => {
+		await page.goto("/consultoria-legal");
 		// Header v3 presente (landmark navigation "Consultoría") en todos los
 		// breakpoints. En móvil el CTA "Agendar reunión" vive dentro del menú
 		// colapsado (Radix Dialog); el CTA queda cubierto por el test de #cta.
@@ -16,7 +21,7 @@ test.describe("Landing /consultoria — smoke", () => {
 	});
 
 	test("presenta las secciones del rediseño v3", async ({ page }) => {
-		await page.goto("/consultoria");
+		await page.goto("/consultoria-legal");
 		await expect(page.locator("#espejo")).toBeVisible();
 		// F03 / F04 son placeholders hasta PR4 / PR5
 		await expect(page.locator("#como")).toBeVisible();
@@ -28,7 +33,7 @@ test.describe("Landing /consultoria — smoke", () => {
 	});
 
 	test("CTA Final apunta al WhatsApp correcto", async ({ page }) => {
-		await page.goto("/consultoria");
+		await page.goto("/consultoria-legal");
 		const wa = page
 			.locator("#cta")
 			.getByRole("link", { name: /whatsapp/i })
@@ -37,7 +42,7 @@ test.describe("Landing /consultoria — smoke", () => {
 	});
 
 	test("FAQ acordeón abre/cierra preguntas", async ({ page }) => {
-		await page.goto("/consultoria");
+		await page.goto("/consultoria-legal");
 		// Q1 abierto por default (mostrar la respuesta).
 		const q1Btn = page.getByRole("button", {
 			name: /¿Cuánto tarda ver resultados\?/i,

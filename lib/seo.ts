@@ -52,7 +52,7 @@ export function servicesJsonLd() {
  * Offers de Consultoría derivados de la fuente única STEPS. Emite el Offer
  * regular y, cuando la edición fundadora está activa (`founderPrice` presente),
  * un Offer adicional "— Fundador". Lo comparten `ofertaJsonLd` (home) y
- * `consultoriaServiceJsonLd` (/consultoria) para que el structured data de
+ * `consultoriaServiceJsonLd` (/consultoria-legal) para que el structured data de
  * ambas superficies no diverja (gate de consistencia en `seo.test.ts`).
  * Cuando la edición fundadora cierre (founderPrice ausente), ambos volverán a
  * emitir solo el precio regular sin tocar nada.
