@@ -72,9 +72,13 @@ describe("seo — ofertaJsonLd", () => {
 		expect(ofertaJsonLd().serviceType).toBe("Adopción de IA empresarial");
 	});
 
-	it("los precios de Consultoría derivan de STEPS", () => {
+	it("los precios de Consultoría (regular + fundador) derivan de STEPS", () => {
 		const consultoria = STEPS.find((s) => s.name === "Consultoría");
-		const expected = (consultoria?.options ?? []).map((o) => o.price.replace(/[^0-9]/g, ""));
+		const expected = (consultoria?.options ?? []).flatMap((o) =>
+			o.founderPrice
+				? [o.price.replace(/[^0-9]/g, ""), o.founderPrice.replace(/[^0-9]/g, "")]
+				: [o.price.replace(/[^0-9]/g, "")],
+		);
 		expect(ofertaJsonLd().offers.map((o) => o.price)).toEqual(expected);
 	});
 
@@ -88,8 +92,12 @@ describe("seo — ofertaJsonLd", () => {
 		}
 	});
 
-	it("no expone el precio fundador interno", () => {
-		expect(JSON.stringify(ofertaJsonLd())).not.toContain("200000");
+	// TD-3 reabierta (decisión de empresa 2026-06-03, opción B): la edición
+	// fundadora es pública. El JSON-LD ahora SÍ emite el precio fundador.
+	it("expone el precio fundador de la edición fundadora", () => {
+		const json = JSON.stringify(ofertaJsonLd());
+		expect(json).toContain("200000");
+		expect(json).toContain("1200000");
 	});
 });
 
@@ -106,13 +114,17 @@ describe("seo — consultoriaServiceJsonLd", () => {
 		);
 	});
 
-	it("emite exactamente dos offers (Inicial + Completa)", () => {
-		expect(consultoriaServiceJsonLd().offers).toHaveLength(2);
+	it("emite cuatro offers (Inicial + Completa, cada una regular + fundador)", () => {
+		expect(consultoriaServiceJsonLd().offers).toHaveLength(4);
 	});
 
-	it("los precios derivan de STEPS, no están hardcodeados", () => {
+	it("los precios (regular + fundador) derivan de STEPS, no están hardcodeados", () => {
 		const consultoria = STEPS.find((s) => s.name === "Consultoría");
-		const expected = (consultoria?.options ?? []).map((o) => o.price.replace(/[^0-9]/g, ""));
+		const expected = (consultoria?.options ?? []).flatMap((o) =>
+			o.founderPrice
+				? [o.price.replace(/[^0-9]/g, ""), o.founderPrice.replace(/[^0-9]/g, "")]
+				: [o.price.replace(/[^0-9]/g, "")],
+		);
 		expect(consultoriaServiceJsonLd().offers.map((o) => o.price)).toEqual(expected);
 	});
 
@@ -133,15 +145,20 @@ describe("seo — consultoriaServiceJsonLd", () => {
 		}
 	});
 
-	it("no expone el precio fundador interno", () => {
-		expect(JSON.stringify(consultoriaServiceJsonLd())).not.toContain("200000");
+	// TD-3 reabierta (decisión de empresa 2026-06-03, opción B): /consultoria
+	// muestra el split fundador en la UI; su structured data lo declara igual.
+	it("expone el precio fundador de la edición fundadora", () => {
+		const json = JSON.stringify(consultoriaServiceJsonLd());
+		expect(json).toContain("200000");
+		expect(json).toContain("1200000");
 	});
 
-	it("los nombres de offer derivan de los labels de STEPS", () => {
+	it("los nombres de offer derivan de los labels de STEPS (regular + fundador)", () => {
 		const consultoria = STEPS.find((s) => s.name === "Consultoría");
-		const expected = (consultoria?.options ?? []).map(
-			(o) => `Consultoría ${o.label.toLowerCase()}`,
-		);
+		const expected = (consultoria?.options ?? []).flatMap((o) => {
+			const base = `Consultoría ${o.label.toLowerCase()}`;
+			return o.founderPrice ? [base, `${base} — Fundador`] : [base];
+		});
 		expect(consultoriaServiceJsonLd().offers.map((o) => o.name)).toEqual(expected);
 	});
 

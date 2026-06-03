@@ -48,13 +48,18 @@ export function servicesJsonLd() {
 	}));
 }
 
-export function ofertaJsonLd() {
+/**
+ * Offers de Consultoría derivados de la fuente única STEPS. Emite el Offer
+ * regular y, cuando la edición fundadora está activa (`founderPrice` presente),
+ * un Offer adicional "— Fundador". Lo comparten `ofertaJsonLd` (home) y
+ * `consultoriaServiceJsonLd` (/consultoria) para que el structured data de
+ * ambas superficies no diverja (gate de consistencia en `seo.test.ts`).
+ * Cuando la edición fundadora cierre (founderPrice ausente), ambos volverán a
+ * emitir solo el precio regular sin tocar nada.
+ */
+function consultoriaOffers() {
 	const consultoria = STEPS.find((s) => s.name === "Consultoría");
-	const options = consultoria?.options ?? [];
-	// Emitimos ambos Offers (regular + fundador) cuando el tier fundador
-	// está activo. Cuando la edición fundadora cierre (founderPrice ausente),
-	// el JSON-LD volverá a emitir solo el precio regular sin tocar nada.
-	const offers = options.flatMap((o) => {
+	return (consultoria?.options ?? []).flatMap((o) => {
 		const base = {
 			"@type": "Offer" as const,
 			name: `Consultoría ${o.label.toLowerCase()}`,
@@ -72,30 +77,26 @@ export function ofertaJsonLd() {
 			},
 		];
 	});
+}
+
+export function ofertaJsonLd() {
 	return {
 		"@context": "https://schema.org",
 		"@type": "Service",
 		serviceType: "Adopción de IA empresarial",
 		provider: { "@type": "Organization", name: brand.name },
 		areaServed: { "@type": "Country", name: "Colombia" },
-		offers,
+		offers: consultoriaOffers(),
 	};
 }
 
 export function consultoriaServiceJsonLd() {
-	const consultoria = STEPS.find((s) => s.name === "Consultoría");
-	const offers = (consultoria?.options ?? []).map((o) => ({
-		"@type": "Offer",
-		name: `Consultoría ${o.label.toLowerCase()}`,
-		price: o.price.replace(/[^0-9]/g, ""),
-		priceCurrency: "COP",
-	}));
 	return {
 		"@context": "https://schema.org",
 		"@type": "Service",
 		serviceType: "Consultoría de adopción de IA para firmas legales",
 		provider: { "@type": "Organization", name: brand.name },
 		areaServed: { "@type": "Country", name: "Colombia" },
-		offers,
+		offers: consultoriaOffers(),
 	};
 }
