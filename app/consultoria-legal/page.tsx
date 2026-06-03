@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { type ReactElement, useEffect, useState } from "react";
+import type { ReactElement } from "react";
 import { OfferLadderV3 } from "@/components/consultoria/OfferLadderV3";
 import { fadeUp, stagger } from "@/components/motion/variants";
 import { CTAFinal } from "@/components/sections/CTAFinal";
@@ -15,82 +15,61 @@ import { HeroR3F } from "@/components/sections/HeroR3F";
 import { ParaQuien } from "@/components/sections/ParaQuien";
 
 /* =========================================================================
- * /consultoria — Rediseño v3
+ * /consultoria-legal — Landing de conversión legal-first
  *
- * Estructura de 9 secciones (orden HTML v3):
- *   F01 Hero R3F             (componente HeroR3F — Fase 3 R3F; migrado desde
- *                              HeroSplite PR6 sin pérdida visual)
- *   F02 El Espejo            (componente Espejo — PR3)
- *   F03 Cómo trabajamos      (componente OfferLadderV3 — PR4: embudo onyx
- *                              con pricing inline split fundador/regular)
- *   F04 El Diagnóstico       (placeholder hasta PR5: sticky scroll narrativo)
- *   F05 Diferenciadores      (componente Diferenciadores — PR3)
- *   F06 Para quién           (componente ParaQuien — PR3)
- *   F07 CTA final            (componente CTAFinal — PR3)
- *   F08 FAQ                  (componente FAQ — PR3)
+ * Secuencia editorial: Hero · El Espejo · Cómo trabajamos (embudo) ·
+ * El Diagnóstico · Diferenciadores · Para quién · CTA final · FAQ.
  *
- * ConsultoriaHeader y ConsultoriaFooter están montados en el layout
- * (app/consultoria/layout.tsx) junto con el JSON-LD del Service.
- *
- * Toda la copy es literal del prototipo HTML v3:
- *   C:/Users/juanj/Downloads/TheoLab Design System (1)/
- *     design_handoff_consultoria_hero_3d/reference-prototype/
- *     TheoLab - Consultoría v3.html
+ * ConsultoriaHeader y ConsultoriaFooter se montan en el layout
+ * (app/consultoria-legal/layout.tsx) junto con el JSON-LD del Service.
  * ========================================================================= */
 
 export default function ConsultoriaPage(): ReactElement {
-	// `spotsLeft` también se podría leer aquí si la página necesitara presentarlo
-	// fuera del header (ej. un widget inline en F07). Por ahora el único consumer
-	// es ConsultoriaHeader, que ya recibe el valor desde el layout.
-	const [hasMounted, setHasMounted] = useState(false);
-	useEffect(() => setHasMounted(true), []);
-	// Reservamos el hook para PR4/PR5 que probablemente consumirán client state.
-	void hasMounted;
-
 	return (
 		<main id="main" className="flex-1">
-			{/* F01 — Hero R3F (Fase 3 R3F; sustituye HeroSplite con Canvas R3F + LookAt head) */}
+			{/* Hero R3F */}
 			<HeroR3F />
 
-			{/* F02 — El Espejo */}
+			{/* El Espejo */}
 			<Espejo />
 
-			{/* F03 — Cómo trabajamos · OfferLadderV3 (PR4) */}
+			{/* Cómo trabajamos — embudo con split fundador/regular */}
 			<OfferLadderV3 />
 
-			{/* F04 — El Diagnóstico (placeholder PR5) */}
-			<SectionPlaceholder
+			{/* El Diagnóstico — el activo entregable del cliente */}
+			<DiagnosticoSection
 				id="diagnostico"
 				eyebrow="Lo que se lleva"
 				title="«El Diagnóstico» no es un PDF. Es un activo."
-				note="Próximamente — sticky scroll MAPEAR / PRIORIZAR / ENTREGAR (PR5)."
+				note="Suyo desde el primer día. Con métricas que usted puede auditar."
 				tone="alabaster"
 			/>
 
-			{/* F05 — Diferenciadores */}
+			{/* Diferenciadores */}
 			<Diferenciadores />
 
-			{/* F06 — Para quién */}
+			{/* Para quién */}
 			<ParaQuien />
 
-			{/* F07 — CTA final */}
+			{/* CTA final */}
 			<CTAFinal />
 
-			{/* F08 — FAQ */}
+			{/* FAQ */}
 			<FAQ />
 		</main>
 	);
 }
 
 /* -------------------------------------------------------------------------
- * SectionPlaceholder
+ * DiagnosticoSection
  *
- * Render mínimo de F03 y F04 mientras PR4 y PR5 se construyen. Mantiene la
- * estructura editorial (eyebrow + título + nota mono) para que la página
- * lea como una secuencia coherente aunque dos secciones estén pendientes.
+ * Sección editorial mínima (eyebrow + título + nota) que presenta «El
+ * Diagnóstico» como el activo entregable del que el cliente es dueño. Mantiene
+ * la cadencia visual del resto de la página; su narrativa extendida (recorrido
+ * MAPEAR / PRIORIZAR / ENTREGAR) se construirá más adelante.
  * ------------------------------------------------------------------------- */
 
-interface SectionPlaceholderProps {
+interface DiagnosticoSectionProps {
 	id: string;
 	eyebrow: string;
 	title: string;
@@ -98,13 +77,13 @@ interface SectionPlaceholderProps {
 	tone: "onyx" | "alabaster";
 }
 
-function SectionPlaceholder({
+function DiagnosticoSection({
 	id,
 	eyebrow,
 	title,
 	note,
 	tone,
-}: SectionPlaceholderProps): ReactElement {
+}: DiagnosticoSectionProps): ReactElement {
 	const isDark = tone === "onyx";
 	const bg = isDark ? "var(--color-onyx)" : "var(--color-alabaster)";
 	const fg = isDark ? "var(--color-alabaster)" : "var(--color-onyx)";

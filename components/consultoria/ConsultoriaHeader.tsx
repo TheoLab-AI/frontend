@@ -35,7 +35,9 @@ const anchors = items.map((i) => i.href);
 
 const Brand = (): ReactElement => (
 	<Link href="/" aria-label="Volver al inicio de TheoLab">
-		<Wordmark size="sm" />
+		{/* Header onyx → wordmark en alabaster (si no, "Theo" queda oscuro sobre
+		    oscuro y solo se ve "Lab"). Mismo patrón que ConsultoriaFooter. */}
+		<Wordmark size="sm" className="text-[var(--color-alabaster)]" />
 	</Link>
 );
 
