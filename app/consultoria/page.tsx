@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { type ReactElement, useEffect, useState } from "react";
+import { OfferLadderV3 } from "@/components/consultoria/OfferLadderV3";
 import { fadeUp, stagger } from "@/components/motion/variants";
 import { CTAFinal } from "@/components/sections/CTAFinal";
 import { Diferenciadores } from "@/components/sections/Diferenciadores";
@@ -16,8 +17,8 @@ import { ParaQuien } from "@/components/sections/ParaQuien";
  * Estructura de 9 secciones (orden HTML v3):
  *   F01 Hero Splite          (componente HeroSplite — PR6)
  *   F02 El Espejo            (componente Espejo — PR3)
- *   F03 Cómo trabajamos      (placeholder hasta PR4: embudo + pricing inline
- *                              con split fundador/regular)
+ *   F03 Cómo trabajamos      (componente OfferLadderV3 — PR4: embudo onyx
+ *                              con pricing inline split fundador/regular)
  *   F04 El Diagnóstico       (placeholder hasta PR5: sticky scroll narrativo)
  *   F05 Diferenciadores      (componente Diferenciadores — PR3)
  *   F06 Para quién           (componente ParaQuien — PR3)
@@ -50,14 +51,8 @@ export default function ConsultoriaPage(): ReactElement {
 			{/* F02 — El Espejo */}
 			<Espejo />
 
-			{/* F03 — Cómo trabajamos (placeholder PR4) */}
-			<SectionPlaceholder
-				id="como"
-				eyebrow="Cómo trabajamos"
-				title="Tres peldaños. Cada uno responde una pregunta distinta."
-				note="Próximamente — embudo con pricing inline + split fundador/regular (PR4)."
-				tone="onyx"
-			/>
+			{/* F03 — Cómo trabajamos · OfferLadderV3 (PR4) */}
+			<OfferLadderV3 />
 
 			{/* F04 — El Diagnóstico (placeholder PR5) */}
 			<SectionPlaceholder
