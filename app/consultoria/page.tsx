@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import dynamic from "next/dynamic";
 import { type ReactElement, useEffect, useState } from "react";
 import { OfferLadderV3 } from "@/components/consultoria/OfferLadderV3";
 import { fadeUp, stagger } from "@/components/motion/variants";
@@ -8,14 +9,29 @@ import { CTAFinal } from "@/components/sections/CTAFinal";
 import { Diferenciadores } from "@/components/sections/Diferenciadores";
 import { Espejo } from "@/components/sections/Espejo";
 import { FAQ } from "@/components/sections/FAQ";
-import { HeroSplite } from "@/components/sections/HeroSplite";
 import { ParaQuien } from "@/components/sections/ParaQuien";
+
+// Hero R3F — import dinámico con ssr:false. three.js + drei tocan `window`/
+// `document` durante la evaluación del módulo, así que defer al cliente.
+// Fallback placeholder mantiene el layout (min-h 108svh) sin reflow al hidratar.
+// HeroSplite.tsx se conserva en el repo como fallback de emergencia durante
+// 1-2 sprints; después se borra junto con /consultoria/r3f-poc.
+const HeroR3F = dynamic(() => import("@/components/sections/HeroR3F").then((mod) => mod.HeroR3F), {
+	ssr: false,
+	loading: () => (
+		<section
+			aria-label="Cargando hero"
+			className="relative min-h-[108svh] bg-[var(--color-onyx)] border-b border-[var(--color-divider)]"
+		/>
+	),
+});
 
 /* =========================================================================
  * /consultoria — Rediseño v3
  *
  * Estructura de 9 secciones (orden HTML v3):
- *   F01 Hero Splite          (componente HeroSplite — PR6)
+ *   F01 Hero R3F             (componente HeroR3F — Fase 3 R3F; migrado desde
+ *                              HeroSplite PR6 sin pérdida visual)
  *   F02 El Espejo            (componente Espejo — PR3)
  *   F03 Cómo trabajamos      (componente OfferLadderV3 — PR4: embudo onyx
  *                              con pricing inline split fundador/regular)
@@ -45,8 +61,8 @@ export default function ConsultoriaPage(): ReactElement {
 
 	return (
 		<main id="main" className="flex-1">
-			{/* F01 — Hero Splite (PR6, intacto) */}
-			<HeroSplite />
+			{/* F01 — Hero R3F (Fase 3 R3F; sustituye HeroSplite con Canvas R3F + LookAt head) */}
+			<HeroR3F />
 
 			{/* F02 — El Espejo */}
 			<Espejo />
