@@ -11,24 +11,42 @@ import { type MouseFollowRef, RobotLookAt } from "@/components/r3f/RobotLookAt";
  * HeroR3FScene — Canvas R3F para el Hero de producción
  *
  * Setup HD calibrado para FONDO ONYX OSCURO (Card variant="dark" detrás).
- * Diferencias vs HeroR3FPoc (fondo alabaster):
- *   - toneMappingExposure 1.15 (vs 1.0) — fondo oscuro absorbe luz, necesita más
- *   - Environment preset "studio" (vs "city") — gradiente neutro más cinematic
- *   - Bloom intensity 0.4 luminanceThreshold 0.72 (vs 0.25 / 0.9) —
- *     los highlights del traje cyborg se vuelven dramáticos sobre onyx
- *   - ContactShadows opacity 0.55, color #000 — sombra más definida sobre
- *     el background del Card (el Canvas es transparente, así que la sombra
- *     se proyecta sobre lo que esté detrás)
- *   - 3-point lighting recalibrado: key cálido desde upper-right (no izq.) para
- *     contrastar con el Spotlight gold que vive en upper-left de la Card
- *   - Fill frío desde lower-left para definir contorno contra onyx
- *   - Rim cálido desde back-low para halo dorado coherente con la paleta brand
+ *
+ * --- Framing ---
+ * El bbox del GLB rigged es:
+ *   X: -0.95 .. 0.95  (ancho ~1.9 u)
+ *   Y: -0.5  .. 1.5   (altura 2.0 u, origen en los pies)
+ *   Z: -0.21 .. 0.21
+ *
+ * Cámara a [0, 0.5, 5.0] mirando hacia -Z desde Y=0.5 (centro vertical del
+ * robot). A fov 30°, el frustum vertical a Z=0 mide 2 × 5 × tan(15°) ≈
+ * 2.68 u — margen vertical de ~0.34 u arriba y abajo. En aspect ratio
+ * portrait (container 819×1080 aprox) el ancho visible es ~2.04 u, lo
+ * cual cubre los hombros (1.9 u) con margen. Cuerpo entero visible sin
+ * recorte en cualquier viewport razonable.
+ *
+ * Cambio vs versión anterior ([0, 1.05, 1.85] fov 32 — busto-arriba): esa
+ * cámara estaba calibrada al POC alabaster con container cuadrado. En
+ * producción el container es portrait y dejaba el robot mostrando solo
+ * de cintura para abajo.
+ *
+ * --- Anti-aliasing ---
+ * - dpr=[1.5, 2.5] (vs [1, 2]): renderiza a 1.5× mínimo y hasta 2.5× en
+ *   retina. Mejora los edges del modelo PBR sin pasar a 3× que quema
+ *   batería en Apple devices.
+ * - multisampling=8 en EffectComposer (vs 4): MSAA hardware más agresivo
+ *   sobre los polygons, complementado con SMAA postprocess.
+ *
+ * --- Calibración heredada ---
+ *   - toneMappingExposure 1.15 — fondo oscuro absorbe luz
+ *   - Environment preset "studio" — gradiente neutro cinematic
+ *   - Bloom intensity 0.4 / luminanceThreshold 0.72 — highlights del cyborg
+ *   - ContactShadows opacity 0.55 color #000 — definida sobre onyx
+ *   - 3-point lighting: key cálido upper-right (no compite con Spotlight
+ *     gold upper-left), fill frío izq-inferior, rim cálido back-low
  *   - OrbitControls REMOVIDOS — producción no permite rotación libre
- *   - dpr=[1, 2] retina sin pasar a 3x (Apple devices) para no quemar batería
  *
  * Canvas transparente: hereda el bg del Card padre (var(--color-onyx)).
- * Suspense fallback es null porque el contenedor padre ya muestra el placeholder
- * mientras el chunk dynamic carga.
  * ========================================================================= */
 
 interface HeroR3FSceneProps {
@@ -39,7 +57,7 @@ interface HeroR3FSceneProps {
 export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FSceneProps): ReactElement {
 	return (
 		<Canvas
-			dpr={[1, 2]}
+			dpr={[1.5, 2.5]}
 			gl={{
 				antialias: true,
 				toneMapping: THREE.ACESFilmicToneMapping,
@@ -48,7 +66,7 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 				powerPreference: "high-performance",
 				alpha: true,
 			}}
-			camera={{ position: [0, 1.05, 1.85], fov: 32 }}
+			camera={{ position: [0, 0.5, 5.0], fov: 30 }}
 			shadows
 			style={{ background: "transparent" }}
 		>
@@ -76,7 +94,7 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 					<RobotLookAt mouseRef={mouseRef} enabled={lookAtEnabled} />
 				</group>
 				<ContactShadows
-					position={[0, -1.1, 0]}
+					position={[0, -0.5, 0]}
 					opacity={0.55}
 					scale={6}
 					blur={2.6}
@@ -85,7 +103,7 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 				/>
 			</Suspense>
 
-			<EffectComposer multisampling={4}>
+			<EffectComposer multisampling={8}>
 				<SMAA />
 				<Bloom intensity={0.4} luminanceThreshold={0.72} luminanceSmoothing={0.22} mipmapBlur />
 			</EffectComposer>

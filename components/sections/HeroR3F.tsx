@@ -13,11 +13,15 @@ import { TextShimmer } from "@/components/ui/TextShimmer";
  * HeroR3F — Hero de producción · Fase 3 R3F
  *
  * Reemplaza HeroSplite.tsx en /consultoria. Mantiene la ARQUITECTURA VISUAL
- * idéntica (Card variant=dark, Spotlight gold upper-left, HeroVeil de
- * legibilidad, layout split 50/50 en lg, copy column con typewriter +
- * pills + banner reactivo). Lo único que cambia es el bloque 3D:
+ * (Card variant=dark, Spotlight gold upper-left, HeroVeil de legibilidad,
+ * layout split 50/50 en lg, pills + banner reactivo), pero cambia:
  *
- *   Spline (<SpliteScene>) → Canvas R3F (<HeroR3FScene>)
+ *   - El bloque 3D: Spline (<SpliteScene>) → Canvas R3F (<HeroR3FScene>)
+ *   - La animación del H1: typewriter char-por-char → word-by-word stagger
+ *     con fade + slide + blur (más fluido y más editorial).
+ *
+ * El texto del H1 se conserva idéntico: "Usted sabe el qué. Nosotros, el
+ * cómo." — solo cambia cómo aparece en pantalla.
  *
  * Ventajas vs la versión Spline:
  *   - Sin watermark, sin suscripción ($0/mes vs Basic $9/mes)
@@ -29,84 +33,111 @@ import { TextShimmer } from "@/components/ui/TextShimmer";
  * HeroSplite.tsx se conserva en el repo como fallback de emergencia durante
  * 1-2 sprints; después se borra.
  *
- * Constantes y sub-componentes (TypedTitle, SymptomPill, HeroVeil, SYMPTOMS,
- * etc.) están DUPLICADOS desde HeroSplite intencionalmente para mantener
- * los dos componentes aislados durante el período de fallback. Cuando
- * HeroSplite se elimine, se pueden extraer a un módulo compartido si vale.
+ * Constantes y sub-componentes (AnimatedTitle, SymptomPill, HeroVeil,
+ * SYMPTOMS) son específicos a este componente — HeroSplite aún usa el
+ * TypedTitle char-por-char. Cuando HeroSplite se elimine se puede revisar
+ * si vale extraer algo a un módulo compartido.
  * ========================================================================= */
 
 const ROBOT_NAME_CANDIDATES_DOC = "tripo::Head_0 (cabeza única que se rota)";
 void ROBOT_NAME_CANDIDATES_DOC; // referencia documentacional, no es código activo
 
-const TITLE_LINE_ONE = "Usted sabe el qué.";
-const TITLE_LINE_TWO_PREFIX = "Nosotros, el ";
+// Estructura del título quebrada en palabras para animación word-by-word.
+// "cómo" lleva shimmer crimson (palabra clave del contraste qué/cómo).
+// La puntuación queda pegada al token ("qué.", "Nosotros,") para no
+// fragmentar el ritmo de lectura. El "." final tras "cómo" es su propio
+// motion.span (se anima al ritmo de las demás) con margin negativo para
+// pegarse visualmente al shimmer.
+const TITLE_LINE_ONE_WORDS = ["Usted", "sabe", "el", "qué."] as const;
+const TITLE_LINE_TWO_PREFIX_WORDS = ["Nosotros,", "el"] as const;
 const TITLE_LINE_TWO_KEY = "cómo";
 const TITLE_LINE_TWO_SUFFIX = ".";
-const TITLE_TOTAL =
-	TITLE_LINE_ONE.length +
-	1 + // newline
-	TITLE_LINE_TWO_PREFIX.length +
-	TITLE_LINE_TWO_KEY.length +
-	TITLE_LINE_TWO_SUFFIX.length;
-
-const TYPEWRITER_DELAY_MS = 520;
-const TYPEWRITER_STEP_MS = 42;
 
 const SYMPTOMS = ["Horas", "Riesgo", "Propuestas", "Otro"] as const;
 type Symptom = (typeof SYMPTOMS)[number];
 
-interface TypedTitleProps {
-	count: number;
-	done: boolean;
-}
+/* -------------------------------------------------------------------------
+ * AnimatedTitle
+ *
+ * Reemplaza el typewriter char-por-char del HeroSplite (que en producción
+ * R3F se sentía discontinuo) por una animación editorial word-by-word:
+ * cada palabra hace fade-in + slide-up + un toque de blur(3px → 0)
+ * con stagger 0.08 s. Shimmer crimson sobre "cómo" se conserva.
+ *
+ * Por qué word-by-word vs typewriter:
+ *   - Más fluido — el ojo no salta entre caracteres parciales.
+ *   - Más editorial — respeta la unidad semántica (palabra) en vez de
+ *     fragmentarla en letras.
+ *   - Más rápido — frase completa en ~1.0 s vs ~2.1 s del typewriter,
+ *     reduciendo la latencia percibida del hero.
+ *
+ * Respeta prefers-reduced-motion: todas las palabras aparecen con opacity
+ * 1, sin offset Y ni blur, sin stagger perceptible.
+ * ------------------------------------------------------------------------- */
+function AnimatedTitle(): ReactElement {
+	const reduce = useReducedMotion();
 
-function TypedTitle({ count, done }: TypedTitleProps): ReactElement {
-	const lineOneVisible = TITLE_LINE_ONE.slice(0, count);
-	const remainderAfterLineOne = Math.max(0, count - TITLE_LINE_ONE.length - 1);
-	const showLineTwo = count > TITLE_LINE_ONE.length;
-	const lineTwoPrefixVisible = TITLE_LINE_TWO_PREFIX.slice(0, remainderAfterLineOne);
-	const remainderAfterPrefix = Math.max(0, remainderAfterLineOne - TITLE_LINE_TWO_PREFIX.length);
-	const keyVisible = TITLE_LINE_TWO_KEY.slice(0, remainderAfterPrefix);
-	const remainderAfterKey = Math.max(0, remainderAfterPrefix - TITLE_LINE_TWO_KEY.length);
-	const suffixVisible = TITLE_LINE_TWO_SUFFIX.slice(0, remainderAfterKey);
+	const containerVariants = {
+		hidden: { opacity: 1 },
+		visible: {
+			opacity: 1,
+			transition: { staggerChildren: 0.08, delayChildren: 0.15 },
+		},
+	};
+
+	const wordVariants = {
+		hidden: { opacity: 0, y: reduce ? 0 : 14, filter: reduce ? "none" : "blur(3px)" },
+		visible: {
+			opacity: 1,
+			y: 0,
+			filter: "blur(0px)",
+			transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const },
+		},
+	};
+
+	const renderWord = (word: string, key: string, shimmer = false): ReactElement => (
+		<motion.span
+			key={key}
+			variants={wordVariants}
+			className="inline-block"
+			style={{ marginRight: "0.28em", willChange: "transform, opacity, filter" }}
+		>
+			{shimmer ? (
+				<TextShimmer variant="crimson" asChild>
+					<span>{word}</span>
+				</TextShimmer>
+			) : (
+				word
+			)}
+		</motion.span>
+	);
 
 	return (
-		<h1
+		<motion.h1
+			initial="hidden"
+			animate="visible"
+			variants={containerVariants}
 			className="text-display text-[var(--color-alabaster)] tracking-tight [font-family:var(--font-display)] [text-wrap:balance]"
-			style={{ minHeight: "2.2em", lineHeight: 1.05 }}
+			style={{ lineHeight: 1.05 }}
 		>
-			<span aria-hidden={!done}>
-				{lineOneVisible}
-				{showLineTwo && (
-					<>
-						<br />
-						{lineTwoPrefixVisible}
-						{keyVisible.length > 0 && (
-							<TextShimmer variant="crimson" asChild>
-								<span>{keyVisible}</span>
-							</TextShimmer>
-						)}
-						{suffixVisible}
-					</>
-				)}
+			<span className="block">{TITLE_LINE_ONE_WORDS.map((w, i) => renderWord(w, `l1-${i}`))}</span>
+			<span className="block">
+				{TITLE_LINE_TWO_PREFIX_WORDS.map((w, i) => renderWord(w, `l2p-${i}`))}
+				{renderWord(TITLE_LINE_TWO_KEY, "l2-key", true)}
+				<motion.span
+					variants={wordVariants}
+					className="inline-block"
+					style={{ marginLeft: "-0.18em", willChange: "transform, opacity, filter" }}
+				>
+					{TITLE_LINE_TWO_SUFFIX}
+				</motion.span>
 			</span>
-			{!done && (
-				<span
-					aria-hidden="true"
-					className="ml-[0.05ch] inline-block w-[0.5ch] translate-y-[0.08em] bg-[var(--color-crimson)] align-baseline"
-					style={{
-						height: "0.95em",
-						animation: "theolab-blink 1s step-end infinite",
-					}}
-				/>
-			)}
+			{/* Texto accesible completo para lectores de pantalla */}
 			<span className="sr-only">
-				{TITLE_LINE_ONE} {TITLE_LINE_TWO_PREFIX}
-				{TITLE_LINE_TWO_KEY}
+				Usted sabe el qué. Nosotros, el {TITLE_LINE_TWO_KEY}
 				{TITLE_LINE_TWO_SUFFIX}
 			</span>
-			<style>{`@keyframes theolab-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }`}</style>
-		</h1>
+		</motion.h1>
 	);
 }
 
@@ -189,7 +220,6 @@ function R3FFallback(): ReactElement {
 
 export function HeroR3F(): ReactElement {
 	const prefersReducedMotion = useReducedMotion();
-	const [typedCount, setTypedCount] = useState<number>(prefersReducedMotion ? TITLE_TOTAL : 0);
 	const [selected, setSelected] = useState<Set<Symptom>>(() => new Set());
 
 	// Mouse-follow shared ref. Mutado por el listener DOM, leído por el Canvas
@@ -223,29 +253,6 @@ export function HeroR3F(): ReactElement {
 		};
 	}, [prefersReducedMotion]);
 
-	// Typewriter — chained setTimeouts respect prefers-reduced-motion
-	useEffect(() => {
-		if (prefersReducedMotion) {
-			setTypedCount(TITLE_TOTAL);
-			return;
-		}
-		let cancelled = false;
-		let timer: ReturnType<typeof setTimeout> | null = null;
-		const tick = (n: number) => {
-			if (cancelled) return;
-			setTypedCount(n);
-			if (n < TITLE_TOTAL) {
-				timer = setTimeout(() => tick(n + 1), TYPEWRITER_STEP_MS);
-			}
-		};
-		const initial = setTimeout(() => tick(1), TYPEWRITER_DELAY_MS);
-		return () => {
-			cancelled = true;
-			clearTimeout(initial);
-			if (timer) clearTimeout(timer);
-		};
-	}, [prefersReducedMotion]);
-
 	// SSR-safe media query lg+ — mismo patrón que HeroSplite para evitar montar
 	// dos Canvas (desktop + mobile) en simultáneo. UNA sola instancia activa
 	// según viewport.
@@ -269,8 +276,6 @@ export function HeroR3F(): ReactElement {
 	}, []);
 
 	const activeList = useMemo<Symptom[]>(() => SYMPTOMS.filter((s) => selected.has(s)), [selected]);
-
-	const typedDone = typedCount >= TITLE_TOTAL;
 
 	return (
 		<section id="hero-consultoria" aria-label="Consultoría TheoLab — apertura" className="relative">
@@ -325,7 +330,7 @@ export function HeroR3F(): ReactElement {
 						</motion.div>
 
 						<motion.div variants={fadeUp}>
-							<TypedTitle count={typedCount} done={typedDone} />
+							<AnimatedTitle />
 						</motion.div>
 
 						<motion.p
