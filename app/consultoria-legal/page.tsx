@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "motion/react";
-import dynamic from "next/dynamic";
 import { type ReactElement, useEffect, useState } from "react";
 import { OfferLadderV3 } from "@/components/consultoria/OfferLadderV3";
 import { fadeUp, stagger } from "@/components/motion/variants";
@@ -9,22 +8,11 @@ import { CTAFinal } from "@/components/sections/CTAFinal";
 import { Diferenciadores } from "@/components/sections/Diferenciadores";
 import { Espejo } from "@/components/sections/Espejo";
 import { FAQ } from "@/components/sections/FAQ";
+// Hero R3F renderizado en SSR (HTML inicial con copy + poster → LCP rápido). El
+// Canvas three.js vive dentro como dynamic ssr:false (HeroR3FScene), así que el
+// hero ya no toca three durante la evaluación del módulo y es SSR-safe.
+import { HeroR3F } from "@/components/sections/HeroR3F";
 import { ParaQuien } from "@/components/sections/ParaQuien";
-
-// Hero R3F — import dinámico con ssr:false. three.js + drei tocan `window`/
-// `document` durante la evaluación del módulo, así que defer al cliente.
-// Fallback placeholder mantiene el layout (min-h 108svh) sin reflow al hidratar.
-// HeroSplite.tsx se conserva en el repo como fallback de emergencia durante
-// 1-2 sprints; después se borra junto con /consultoria/r3f-poc.
-const HeroR3F = dynamic(() => import("@/components/sections/HeroR3F").then((mod) => mod.HeroR3F), {
-	ssr: false,
-	loading: () => (
-		<section
-			aria-label="Cargando hero"
-			className="relative min-h-[108svh] bg-[var(--color-onyx)] border-b border-[var(--color-divider)]"
-		/>
-	),
-});
 
 /* =========================================================================
  * /consultoria — Rediseño v3
