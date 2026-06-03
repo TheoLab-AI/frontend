@@ -1,0 +1,366 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-06-03T00:00:00Z",
+	"title": "Design System: TheoLab",
+	"extensions": {
+		"colorMeta": {
+			"onyx": {
+				"role": "neutral",
+				"displayName": "Onyx Ink",
+				"canonical": "oklch(0.10 0 0)",
+				"tonalRamp": [
+					"oklch(0.06 0 0)",
+					"oklch(0.10 0 0)",
+					"oklch(0.16 0 0)",
+					"oklch(0.24 0 0)",
+					"oklch(0.34 0 0)",
+					"oklch(0.46 0 0)",
+					"oklch(0.60 0 0)",
+					"oklch(0.74 0 0)"
+				]
+			},
+			"slate": {
+				"role": "neutral",
+				"displayName": "Slate Mist",
+				"canonical": "oklch(0.55 0.02 240)",
+				"tonalRamp": [
+					"oklch(0.22 0.02 240)",
+					"oklch(0.32 0.02 240)",
+					"oklch(0.42 0.02 240)",
+					"oklch(0.55 0.02 240)",
+					"oklch(0.65 0.02 240)",
+					"oklch(0.75 0.02 240)",
+					"oklch(0.85 0.01 240)",
+					"oklch(0.93 0.005 240)"
+				]
+			},
+			"alabaster": {
+				"role": "neutral",
+				"displayName": "Alabaster Paper",
+				"canonical": "oklch(0.92 0.003 90)",
+				"tonalRamp": [
+					"oklch(0.20 0.003 90)",
+					"oklch(0.34 0.003 90)",
+					"oklch(0.50 0.003 90)",
+					"oklch(0.66 0.003 90)",
+					"oklch(0.78 0.003 90)",
+					"oklch(0.86 0.003 90)",
+					"oklch(0.92 0.003 90)",
+					"oklch(0.97 0.002 90)"
+				]
+			},
+			"paper": {
+				"role": "neutral",
+				"displayName": "Paper Surface",
+				"canonical": "oklch(0.95 0.003 90)",
+				"tonalRamp": [
+					"oklch(0.22 0.003 90)",
+					"oklch(0.36 0.003 90)",
+					"oklch(0.52 0.003 90)",
+					"oklch(0.68 0.003 90)",
+					"oklch(0.80 0.003 90)",
+					"oklch(0.88 0.003 90)",
+					"oklch(0.95 0.003 90)",
+					"oklch(0.98 0.002 90)"
+				]
+			},
+			"crimson": {
+				"role": "primary",
+				"displayName": "Crimson Fire",
+				"canonical": "oklch(0.65 0.24 38)",
+				"tonalRamp": [
+					"oklch(0.25 0.12 38)",
+					"oklch(0.35 0.16 38)",
+					"oklch(0.45 0.20 38)",
+					"oklch(0.55 0.22 38)",
+					"oklch(0.65 0.24 38)",
+					"oklch(0.74 0.20 38)",
+					"oklch(0.84 0.14 38)",
+					"oklch(0.93 0.06 38)"
+				]
+			},
+			"orange": {
+				"role": "secondary",
+				"displayName": "Orange (Gradient Middle)",
+				"canonical": "oklch(0.72 0.20 60)",
+				"tonalRamp": [
+					"oklch(0.28 0.10 60)",
+					"oklch(0.38 0.14 60)",
+					"oklch(0.50 0.18 60)",
+					"oklch(0.62 0.20 60)",
+					"oklch(0.72 0.20 60)",
+					"oklch(0.81 0.16 60)",
+					"oklch(0.89 0.10 60)",
+					"oklch(0.95 0.04 60)"
+				]
+			},
+			"gold": {
+				"role": "tertiary",
+				"displayName": "Sealed Gold",
+				"canonical": "oklch(0.85 0.17 90)",
+				"tonalRamp": [
+					"oklch(0.30 0.08 90)",
+					"oklch(0.42 0.12 90)",
+					"oklch(0.55 0.15 90)",
+					"oklch(0.68 0.17 90)",
+					"oklch(0.78 0.17 90)",
+					"oklch(0.85 0.17 90)",
+					"oklch(0.92 0.10 90)",
+					"oklch(0.97 0.04 90)"
+				]
+			},
+			"burgundy": {
+				"role": "deprecated",
+				"displayName": "Manuscript Burgundy (Deprecated, Print Fallback Only)",
+				"canonical": "oklch(0.34 0.18 17)",
+				"tonalRamp": [
+					"oklch(0.18 0.10 17)",
+					"oklch(0.26 0.14 17)",
+					"oklch(0.34 0.18 17)",
+					"oklch(0.42 0.20 17)",
+					"oklch(0.52 0.20 17)",
+					"oklch(0.64 0.16 17)",
+					"oklch(0.78 0.10 17)",
+					"oklch(0.90 0.04 17)"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display",
+				"purpose": "Hero headlines de página. Inter Tight 700 con tracking -0.03em y line-height 0.95. Una vez por página, máximo dos."
+			},
+			"headline": {
+				"displayName": "Headline",
+				"purpose": "Titulares de sección (<h2>). Inter 600 con tracking -0.02em."
+			},
+			"title": {
+				"displayName": "Title",
+				"purpose": "Titulares de card, tiers de pricing, headings de FAQ. Inter 600."
+			},
+			"body": {
+				"displayName": "Body",
+				"purpose": "Copy general. Inter 400, line-height 1.55, tabular-nums activo para cifras inline."
+			},
+			"bodyLg": {
+				"displayName": "Body Large",
+				"purpose": "Subhead bajo headlines, párrafos de apertura. Max-width 65ch recomendado."
+			},
+			"label": {
+				"displayName": "Label",
+				"purpose": "Eyebrows, badges, metadata. Uppercase tracking 0.08em. Frases ≤ 4 palabras. Reservado a secciones que abren bloque temático nuevo."
+			},
+			"ui": {
+				"displayName": "UI",
+				"purpose": "Button labels, link UI, navbar items. Inter 500 con tracking 0.01em."
+			}
+		},
+		"shadows": [],
+		"motion": [
+			{
+				"name": "ease-brand",
+				"value": "cubic-bezier(0.16, 1, 0.3, 1)",
+				"purpose": "Easing principal del sistema (expo-out). Sobrio, decidido. Usado en transitions de bg/border/color en botones, cards, badges."
+			},
+			{
+				"name": "ease-entry",
+				"value": "cubic-bezier(0.32, 0.72, 0, 1)",
+				"purpose": "Easing para entradas viewport (fadeUp, stagger). Más responsivo, menos exponencial."
+			},
+			{
+				"name": "duration-fast",
+				"value": "0.2s",
+				"purpose": "Micro-interacciones: hover de links, toggle de visibility."
+			},
+			{
+				"name": "duration-base",
+				"value": "0.4s",
+				"purpose": "Transitions de UI components default."
+			},
+			{
+				"name": "duration-slow",
+				"value": "0.8s",
+				"purpose": "Reveals de viewport entry, transiciones de sección."
+			},
+			{
+				"name": "duration-hero",
+				"value": "1.2s",
+				"purpose": "Animaciones de hero R3F, secuencias scroll-driven cinematográficas."
+			}
+		],
+		"breakpoints": [
+			{ "name": "md", "value": "768px" },
+			{ "name": "lg", "value": "1024px" },
+			{ "name": "xl", "value": "1280px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Button Solid",
+			"kind": "button",
+			"refersTo": "button-solid",
+			"description": "CTA primaria del sistema. Tinta declarativa con tactile press de 1px.",
+			"html": "<button class=\"ds-btn-solid\">Agendar reunión</button>",
+			"css": ".ds-btn-solid { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; background: #0A0A0A; color: #E5E4E2; font-family: Inter, ui-sans-serif, system-ui; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em; border: none; border-radius: 0; cursor: pointer; user-select: none; white-space: nowrap; transition: background 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-solid:hover { background: #800020; } .ds-btn-solid:active { transform: translateY(1px); } .ds-btn-solid:focus-visible { outline: 2px solid #FF4500; outline-offset: 2px; }"
+		},
+		{
+			"name": "Button Outline",
+			"kind": "button",
+			"refersTo": "button-outline",
+			"description": "CTA secundaria, peso visual mínimo. Hairline border.",
+			"html": "<button class=\"ds-btn-outline\">Ver cómo</button>",
+			"css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; background: transparent; color: #0A0A0A; font-family: Inter, ui-sans-serif, system-ui; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em; border: 1px solid oklch(0.78 0.008 244); border-radius: 0; cursor: pointer; user-select: none; white-space: nowrap; transition: background 300ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-outline:hover { background: #F2F1EF; border-color: #0A0A0A; } .ds-btn-outline:active { transform: translateY(1px); } .ds-btn-outline:focus-visible { outline: 2px solid #FF4500; outline-offset: 2px; }"
+		},
+		{
+			"name": "Button Accent (Gradient Insignia)",
+			"kind": "button",
+			"refersTo": "button-accent",
+			"description": "Firma visual del sistema. UNA instancia por surface, no más. Carga el gradient insignia crimson → orange → gold.",
+			"html": "<button class=\"ds-btn-accent\">Empezar ahora</button>",
+			"css": ".ds-btn-accent { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; background: linear-gradient(90deg, #FF4500 0%, #FF8A00 55%, #FFD700 100%); color: #0A0A0A; font-family: Inter, ui-sans-serif, system-ui; font-size: 0.875rem; font-weight: 600; letter-spacing: 0.01em; border: none; border-radius: 0; cursor: pointer; user-select: none; white-space: nowrap; transition: filter 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-accent:hover { filter: brightness(0.95); } .ds-btn-accent:active { transform: translateY(1px); } .ds-btn-accent:focus-visible { outline: 2px solid #0A0A0A; outline-offset: 2px; }"
+		},
+		{
+			"name": "Card Default",
+			"kind": "card",
+			"refersTo": "card-default",
+			"description": "Superficie editorial sobre alabaster bg. Hairline border, esquinas rectas, sin shadow.",
+			"html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Diagnóstico</h3><p class=\"ds-card-body\">Una semana. Cifras reproducibles del estado inicial.</p></div>",
+			"css": ".ds-card { padding: 24px; background: #E5E4E2; color: #0A0A0A; border: 1px solid oklch(0.78 0.008 244); border-radius: 0; transition: background 300ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-card-title { margin: 0 0 12px; font-family: Inter, ui-sans-serif, system-ui; font-size: 1.375rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; } .ds-card-body { margin: 0; font-family: Inter, ui-sans-serif, system-ui; font-size: 1rem; line-height: 1.55; }"
+		},
+		{
+			"name": "Card Dark",
+			"kind": "card",
+			"refersTo": "card-dark",
+			"description": "Superficie editorial sobre onyx. Borderless, deja respirar el tone shift.",
+			"html": "<div class=\"ds-card-dark\"><h3 class=\"ds-card-dark-title\">Cómo trabajamos</h3><p class=\"ds-card-dark-body\">Tres peldaños. Cada uno responde una pregunta distinta.</p></div>",
+			"css": ".ds-card-dark { padding: 24px; background: #0A0A0A; color: #E5E4E2; border: 0; border-radius: 0; } .ds-card-dark-title { margin: 0 0 12px; font-family: Inter, ui-sans-serif, system-ui; font-size: 1.375rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; } .ds-card-dark-body { margin: 0; font-family: Inter, ui-sans-serif, system-ui; font-size: 1rem; line-height: 1.55; color: rgba(229,228,226,0.8); }"
+		},
+		{
+			"name": "Badge Gold (Sealed)",
+			"kind": "chip",
+			"refersTo": "badge-gold",
+			"description": "Sello dorado. Reservado a 'EDICIÓN FUNDADORA · 10 CUPOS' y highlights de impacto.",
+			"html": "<span class=\"ds-badge-gold\">EDICIÓN FUNDADORA</span>",
+			"css": ".ds-badge-gold { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFD700; color: #0A0A0A; font-family: Inter, ui-sans-serif, system-ui; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 0; user-select: none; }"
+		},
+		{
+			"name": "Badge Neutral",
+			"kind": "chip",
+			"refersTo": "badge-neutral",
+			"description": "Tag de metadata. Estado discreto sobre fondo claro.",
+			"html": "<span class=\"ds-badge-neutral\">BORRADOR</span>",
+			"css": ".ds-badge-neutral { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #F2F1EF; color: #536878; border: 1px solid oklch(0.78 0.008 244); font-family: Inter, ui-sans-serif, system-ui; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 0; user-select: none; }"
+		},
+		{
+			"name": "Wordmark (Signature)",
+			"kind": "custom",
+			"refersTo": "wordmark",
+			"description": "Firma del sistema. 'Theo' en tinta + 'Lab' con gradient insignia pintado. Única instancia legítima de gradient-clip-text.",
+			"html": "<span class=\"ds-wordmark\" aria-label=\"TheoLab\"><span class=\"ds-wordmark-mark\">Theo</span><span class=\"ds-wordmark-spark\">Lab</span></span>",
+			"css": ".ds-wordmark { display: inline-flex; font-family: 'Inter Tight', Inter, ui-sans-serif, system-ui; font-weight: 700; font-size: clamp(1.875rem, 2vw + 1rem, 2.75rem); line-height: 1; letter-spacing: -0.025em; color: #0A0A0A; } .ds-wordmark-mark { color: currentColor; } .ds-wordmark-spark { background-image: linear-gradient(90deg, #FF4500 0%, #FF8A00 55%, #FFD700 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }"
+		},
+		{
+			"name": "Section Label (Editorial Pagination)",
+			"kind": "custom",
+			"refersTo": "section-label",
+			"description": "Eyebrow editorial estilo brand v0.3 pagination ('01 · SERVICES'). Reservado a secciones que abren bloque temático nuevo; no encima de cada section por reflejo.",
+			"html": "<div class=\"ds-section-label\"><span class=\"ds-section-label-index\">03</span><span aria-hidden=\"true\">·</span><span>CÓMO TRABAJAMOS</span></div>",
+			"css": ".ds-section-label { display: inline-flex; align-items: center; gap: 12px; font-family: Inter, ui-sans-serif, system-ui; font-size: 0.75rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.08em; text-transform: uppercase; color: #536878; } .ds-section-label-index { font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }"
+		}
+	],
+	"narrative": {
+		"northStar": "The Archivist's Workbench",
+		"overview": "Una mesa de archivo con luz controlada. Papel grueso de tono cálido neutro (alabaster, paper). Tinta densa (onyx) como peso del sistema. Reglas de margen finísimas (hairlines slate al 18% de opacidad) que ordenan secciones como una página de FT Weekend. Y, al final del recorrido, un sello lacrado en oro: el acento se gana, no se reparte. Esta no es la estética de una herramienta de productividad ni de una agency cool. Es la estética de un proveedor que cobra por criterio.\n\nEl sistema rechaza por contrato lo que PRODUCT.md ya delimitó: cards genéricas con iconos, hero metric templates, body bg cream/sand magazine-warm, glassmorphism decorativo, agency portfolio gradient walls, eyebrows tracked en cada sección. El registro de la voz Archivist (sobrio, denso, sin ornamento) tiene su contraparte visual exacta: tipografía Inter como única familia, hairlines sin sombras, esquinas casi rectas. La compensación es motion deliberadamente ambiciosa (scroll-driven cinematográfico, transiciones memorables entre rutas, coreografía de layout). Voz calmada, página en movimiento.",
+		"keyCharacteristics": [
+			"Sin radius por defecto. Esquinas rectas (0px) en cards, botones, badges. La excepción son chips puntuales (2px).",
+			"Sin sombras. La profundidad vive en hairlines y contraste tonal entre bg, bg-elevated y onyx.",
+			"Una sola familia tipográfica. Inter Variable carga todo el peso; jerarquía en escala y weight, no en variedad.",
+			"Color committed, no decorativo. Burgundy/Crimson/Gold cargan identidad como roles deliberados; nunca como acento suelto.",
+			"Tactile press de 1px. La única respuesta física del sistema: translate-y-[1px] en :active.",
+			"Hairlines como reglas tipográficas. 1px slate al 18% (var(--color-divider)) separan, no decoran."
+		],
+		"rules": [
+			{
+				"name": "The Sealed Wax Rule",
+				"body": "Gold es sello, no decoración. Aparece en momentos puntuales (wordmark, eyebrow dots sobre onyx, highlights de hero, edición fundadora). Cubrir > 10% de un viewport con gold rompe la jerarquía: deja de ser sello.",
+				"section": "colors"
+			},
+			{
+				"name": "The One Voice Rule",
+				"body": "El gradient insignia (crimson → orange → gold) aparece en un solo elemento de impacto por surface, no más. Es la firma. Si lo repites, deja de leer como firma y empieza a leer como wallpaper.",
+				"section": "colors"
+			},
+			{
+				"name": "The Hairline-Not-Border Rule",
+				"body": "Las separaciones entre secciones y entre cards son hairlines 1px en color divider (slate al 18% de opacidad). Bordes gruesos, sombras, o gradientes-divisorios están prohibidos.",
+				"section": "colors"
+			},
+			{
+				"name": "The Burgundy Sunset Rule",
+				"body": "Burgundy está deprecado a fallback de impresión. NUEVO código no lo introduce. El refactor pendiente del Button solid y Badge accent retira burgundy del runtime; ese trabajo entra en el siguiente PR de cleanup.",
+				"section": "colors"
+			},
+			{
+				"name": "The Single Family Rule",
+				"body": "Brand v0.3+v0.4: 'hierarchy lives in weight and scale, not typeface variety'. El sistema usa solo Inter (Variable + Tight). Cifras y código usan Inter con tabular-nums, NO una segunda familia mono.",
+				"section": "typography"
+			},
+			{
+				"name": "The Eyebrow Discipline Rule",
+				"body": "Eyebrows tracked uppercase NO van encima de TODA sección por reflejo. TheoLab los reserva para secciones que abren un bloque temático nuevo. Una eyebrow puntual es voz; eyebrow ritual es gramática AI.",
+				"section": "typography"
+			},
+			{
+				"name": "The Balanced Heading Rule",
+				"body": "text-wrap: balance en h1-h3 para evitar líneas huérfanas. Headings que overflow su container a 768px o 1024px deben acortar copy, no shrinkear la escala.",
+				"section": "typography"
+			},
+			{
+				"name": "The No-Shadow Rule",
+				"body": "Box-shadows están prohibidas como recurso de UI. El sistema visual de TheoLab no carga shadows como sintaxis.",
+				"section": "elevation"
+			},
+			{
+				"name": "The Hairline-As-Rule Rule",
+				"body": "Las hairlines son reglas tipográficas, no decoración. Cada hairline tiene un propósito. Si una hairline está ahí 'porque queda bonito', se retira.",
+				"section": "elevation"
+			},
+			{
+				"name": "The Single Accent Button Rule",
+				"body": "El Button accent (gradient insignia) aparece UNA vez por surface, como la CTA principal del flow. Multiplicarlo lo degrada a wallpaper.",
+				"section": "components"
+			},
+			{
+				"name": "The Nested Card Prohibition",
+				"body": "Nested cards (card dentro de card dentro de card) están prohibidas. Si la información requiere agrupación interna, usa hairlines verticales o spacing, no surfaces anidadas.",
+				"section": "components"
+			}
+		],
+		"dos": [
+			"Do usar rounded-none (0px) como default en cards, botones, badges. Chips puntuales pueden ir a 2px (rounded-xs), nunca más.",
+			"Do separar secciones con hairlines 1px solid var(--color-divider) (slate al 18% opacidad).",
+			"Do elevar superficies cambiando de alabaster (#E5E4E2) a paper (#F2F1EF). Sin shadow.",
+			"Do aplicar translate-y-[1px] en :active de botones como única respuesta tactile.",
+			"Do usar el gradient insignia (crimson #FF4500 → orange #FF8A00 → gold #FFD700) en UNA instancia por surface.",
+			"Do mantener Inter como única familia tipográfica. Cifras y código usan font-variant-numeric: tabular-nums.",
+			"Do honrar prefers-reduced-motion: reduce con crossfade o instant transition en TODA animación.",
+			"Do poner focus ring 2px crimson con offset 2px en TODO control interactivo.",
+			"Do validar contraste body text ≥ 4.5:1 y large text ≥ 3:1. Mínimo /75 en texto pequeño sobre onyx."
+		],
+		"donts": [
+			"Don't SaaS cliché: cards icon+título+desc x3, hero metric template, numbered eyebrows 01/02/03 en cada sección, gradient text decorativo (excepción: Wordmark).",
+			"Don't magazine warm-cream: body bg cream/sand/parchment con chroma baja warm. La calidez la carga el Golden Hour fuego, no el body bg.",
+			"Don't glassmorphism, backdrop-blur decorativo, neumorphism, sombras suaves 'elegantes'. Vibe 2022.",
+			"Don't agency portfolio: gradientes saturados full-page, marquees scrolling, swiss-grunge mix, oversized centered con stock imagery.",
+			"Don't emojis, signos de exclamación, em dashes en copy. Excepción única: tagline canónico.",
+			"Don't buzzwords IA: AI-powered, transform, leverage, seamless, unlock, harness AI, world-class, enterprise-grade, next-generation, cutting-edge, game-changer, mission-critical, disruptive, revolutionary, synergy.",
+			"Don't tiny uppercase tracked eyebrow encima de TODA sección por reflejo.",
+			"Don't side-stripe borders: border-left/right > 1px como acento.",
+			"Don't anidar cards.",
+			"Don't introducir burgundy #800020 en código nuevo de UI. Deprecado a fallback impresión.",
+			"Don't inventar middle stops del gradient insignia. El stop legítimo es orange #FF8A00 al 55%.",
+			"Don't introducir una segunda familia tipográfica. Inter + tabular-nums basta.",
+			"Don't dejar headings overflow en tablet/mobile. Acortar copy, no shrinkear el container."
+		]
+	}
+}
