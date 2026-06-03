@@ -20,7 +20,8 @@
 			"!**/dist",
 			"!**/build",
 			"!**/coverage",
-			"!**/public/brand"
+			"!**/public/brand",
+			"!.claude"
 		]
 	},
 	"formatter": {
