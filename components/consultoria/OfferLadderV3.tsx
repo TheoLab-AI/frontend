@@ -77,10 +77,10 @@ export function OfferLadderV3(): ReactElement {
 					<motion.ol
 						role="list"
 						variants={stagger(0.12)}
-						className="grid grid-cols-1 md:grid-cols-12 gap-px bg-[var(--color-alabaster)]/12 list-none"
+						className="grid grid-cols-1 md:grid-cols-12 list-none"
 					>
 						{STEPS.map((step, i) => (
-							<PeldanoCell key={step.name} step={step} index={i} />
+							<PeldanoCell key={step.name} step={step} index={i} total={STEPS.length} />
 						))}
 					</motion.ol>
 				</motion.div>
@@ -101,15 +101,34 @@ export function OfferLadderV3(): ReactElement {
  * Sólo debe renderizarse dentro de OfferLadderV3.
  * ------------------------------------------------------------------------- */
 
-function PeldanoCell({ step, index }: { step: Step; index: number }): ReactElement {
+function PeldanoCell({
+	step,
+	index,
+	total,
+}: {
+	step: Step;
+	index: number;
+	total: number;
+}): ReactElement {
 	const isWide = Boolean(step.options);
 	const spanClass = isWide ? "md:col-span-6" : "md:col-span-3";
+	const isLast = index === total - 1;
+
+	// En mobile: border-b entre peldaños (no en el último).
+	// En md+: border-r en los peldaños que no son el último (separa columnas).
+	// The Hairline-Not-Border Rule: 1px solid var(--color-divider).
+	const dividerClass = [
+		!isLast ? "border-b border-[var(--color-divider)]" : "",
+		!isLast ? "md:border-b-0 md:border-r md:border-[var(--color-divider)]" : "",
+	]
+		.filter(Boolean)
+		.join(" ");
 
 	return (
 		<motion.li
 			role="listitem"
 			variants={fadeUp}
-			className={`relative bg-[var(--color-onyx)] p-8 md:p-10 flex flex-col gap-6 min-h-[320px] ${spanClass}`}
+			className={`relative bg-[var(--color-onyx)] p-8 md:p-10 flex flex-col gap-6 min-h-[320px] ${spanClass} ${dividerClass}`}
 		>
 			<p className="text-mono text-[0.75rem] uppercase tracking-[0.22em] text-[var(--color-gold)]">
 				Peldaño {formatStepIndex(index)}
@@ -172,9 +191,9 @@ function WidePeldano({ step }: { step: Step }): ReactElement {
 				</p>
 			) : null}
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[var(--color-alabaster)]/10 mt-2">
-				{options.map((option) => (
-					<TierBlock key={option.label} option={option} />
+			<div className="grid grid-cols-1 md:grid-cols-2 mt-2">
+				{options.map((option, idx) => (
+					<TierBlock key={option.label} option={option} isFirst={idx === 0} />
 				))}
 			</div>
 
@@ -192,13 +211,20 @@ function WidePeldano({ step }: { step: Step }): ReactElement {
  * DisplayPrice (split fundador). Si no, sólo DisplayPrice.
  * ------------------------------------------------------------------------- */
 
-function TierBlock({ option }: { option: StepOption }): ReactElement {
+function TierBlock({ option, isFirst }: { option: StepOption; isFirst: boolean }): ReactElement {
 	const hasFounder = Boolean(option.founderPrice);
 	const tierLabelId = useId();
 
+	// En mobile: border-b en el primer tier (separa Inicial de Completa).
+	// En md+: border-r en el primer tier (columna izquierda / columna derecha).
+	// The Hairline-Not-Border Rule: 1px solid var(--color-divider).
+	const tierDivider = isFirst
+		? "border-b border-[var(--color-divider)] md:border-b-0 md:border-r md:border-[var(--color-divider)]"
+		: "";
+
 	return (
 		<article
-			className="bg-[var(--color-onyx)] p-6 md:p-7 flex flex-col gap-4"
+			className={`bg-[var(--color-onyx)] p-6 md:p-7 flex flex-col gap-4 ${tierDivider}`}
 			aria-labelledby={tierLabelId}
 		>
 			<div className="flex flex-col gap-1">

@@ -98,7 +98,12 @@ export function CTAFinal(): ReactElement {
 								<p className="text-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">
 									{c.label}
 								</p>
-								<p className="text-display [font-family:var(--font-display)] text-[var(--color-alabaster)] leading-none break-all">
+								<p
+									className="[font-family:var(--font-display)] text-[var(--color-alabaster)] leading-none break-all"
+									style={{
+										fontSize: "clamp(1.875rem, 4vw + 0.75rem, 2.75rem)",
+									}}
+								>
 									{c.value}
 								</p>
 								<p className="text-body text-[var(--color-alabaster)]/65 mt-auto">{c.cap}</p>
@@ -110,14 +115,14 @@ export function CTAFinal(): ReactElement {
 						))}
 					</motion.div>
 
-					{/* Post mono */}
+					{/* Post mono — opacidad /75 sube de ~4.2:1 a >4.5:1 para
+					   pasar AA en body text small. El email aparece arriba como
+					   link; aquí se omite para no duplicarlo. */}
 					<motion.p
 						variants={fadeUp}
-						className="text-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--color-alabaster)]/45"
+						className="text-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--color-alabaster)]/75"
 					>
 						THEOLAB · BOGOTÁ · COLOMBIA
-						<br />
-						admin@theolab.tech
 					</motion.p>
 				</motion.div>
 			</div>

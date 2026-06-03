@@ -69,18 +69,16 @@ export function FAQ(): ReactElement {
 					variants={stagger(0.08)}
 					className="flex flex-col gap-12 md:gap-14"
 				>
-					{/* Header */}
-					<motion.div variants={fadeUp} className="flex flex-col gap-5 max-w-3xl">
-						<div className="flex items-center gap-3 text-meta uppercase tracking-[0.22em] text-[var(--color-slate)]">
-							<span aria-hidden="true" className="text-[var(--color-crimson)]">
-								●
-							</span>
-							<span>Preguntas que nos hacen</span>
-						</div>
-						<h2 id="faq-headline" className="sr-only">
-							Preguntas frecuentes
-						</h2>
-					</motion.div>
+					{/* Heading visible — el acordeón necesita un ancla escaneable
+					   sin recurrir al eyebrow tracked (banido por Eyebrow Discipline
+					   Rule en secciones que no abren bloque temático nuevo). */}
+					<motion.h2
+						id="faq-headline"
+						variants={fadeUp}
+						className="text-headline [text-wrap:balance]"
+					>
+						Preguntas frecuentes
+					</motion.h2>
 
 					{/* Accordion */}
 					<motion.div

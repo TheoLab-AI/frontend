@@ -5,29 +5,41 @@ import { motion, useReducedMotion } from "motion/react";
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fadeUp, stagger } from "@/components/motion/variants";
 import { Card } from "@/components/ui/Card";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SpliteScene } from "@/components/ui/Splite";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { TextShimmer } from "@/components/ui/TextShimmer";
 
 /* =========================================================================
- * HeroSplite — PR6
+ * HeroSplite — PR6 (hardened)
  *
- * Hero del /diagnostico: replaces el bloque scrollytelling anterior. Compone
- * un Card oscuro a sangrado completo, un Spotlight dorado, un veil de
- * legibilidad para la columna izquierda y un layout split 50/50 con la
+ * Hero de /consultoria. Card oscuro a sangrado completo, Spotlight dorado,
+ * veil de legibilidad para la columna izquierda y layout split 50/50 con la
  * escena Spline a la derecha. La copy izquierda usa un typewriter editorial
  * con cursor crimson; las pills permiten al socio marcar dolores y el banner
  * inferior reacciona con la lista de los términos seleccionados.
+ *
+ * Hardening (2026-06-03):
+ *   - Typewriter resilient: render full text en SSR/no-JS/reduced-motion;
+ *     efecto typewriter como enhancement post-hydrate. sr-only ya no duplica.
+ *   - Symptom persistence: sync con ?sintomas= en URL. Sobrevive scroll,
+ *     refresh, navegación back/forward y deep-link.
+ *   - Spline failure isolation: ErrorBoundary + timeout 10s. Fallback
+ *     geométrico con retry sin bloquear el resto del hero.
+ *   - Mouse-follow safety: RAF solo arranca con robot resuelto; pointerleave
+ *     en document; matchMedia fallback compatible Safari < 14.
+ *   - Reduced motion honrado también en SymptomPill check icon.
+ *   - Copy sin em-dash (DESIGN.md ban) y overflow defensivo en banner.
  * ========================================================================= */
 
 const SPLINE_SCENE = "https://prod.spline.design/cNuv3mbYZVR2Citm/scene.splinecode";
+const SPLINE_LOAD_TIMEOUT_MS = 10_000;
 
 // Candidatos para localizar el root del robot en la escena Spline. Se prueba
 // por name en orden; el primero que matchee es el que rotamos.
 const ROBOT_NAME_CANDIDATES = ["922f8171beff441b", "Robot", "robot", "Body", "Character", "Scene"];
 
 // Límites de rotación (radianes) y velocidad de lerp para suavizado.
-// Mayor amplitud que la default — queremos que se note.
 const ROBOT_MAX_YAW = 0.55; // ~31° horizontal
 const ROBOT_MAX_PITCH = 0.28; // ~16° vertical
 const ROBOT_LERP = 0.09;
@@ -42,12 +54,34 @@ const TITLE_TOTAL =
 	TITLE_LINE_TWO_PREFIX.length +
 	TITLE_LINE_TWO_KEY.length +
 	TITLE_LINE_TWO_SUFFIX.length;
+const TITLE_FULL_TEXT = `${TITLE_LINE_ONE} ${TITLE_LINE_TWO_PREFIX}${TITLE_LINE_TWO_KEY}${TITLE_LINE_TWO_SUFFIX}`;
 
 const TYPEWRITER_DELAY_MS = 520;
 const TYPEWRITER_STEP_MS = 42;
 
 const SYMPTOMS = ["Horas", "Riesgo", "Propuestas", "Otro"] as const;
 type Symptom = (typeof SYMPTOMS)[number];
+const SYMPTOMS_SET: ReadonlySet<string> = new Set<string>(SYMPTOMS);
+const SYMPTOMS_QUERY_KEY = "sintomas";
+
+/* -------------------------------------------------------------------------
+ * URL <-> Set helpers (idempotentes, SSR-safe)
+ * ------------------------------------------------------------------------- */
+
+function parseSymptomsFromQuery(value: string | null | undefined): Set<Symptom> {
+	const next = new Set<Symptom>();
+	if (!value) return next;
+	for (const raw of value.split(",")) {
+		const trimmed = raw.trim();
+		if (SYMPTOMS_SET.has(trimmed)) next.add(trimmed as Symptom);
+	}
+	return next;
+}
+
+function serializeSymptoms(active: ReadonlySet<Symptom>): string {
+	// Orden canónico (no por inserción) para URLs estables y compartibles.
+	return SYMPTOMS.filter((s) => active.has(s)).join(",");
+}
 
 interface TypedTitleProps {
 	count: number;
@@ -67,9 +101,14 @@ function TypedTitle({ count, done }: TypedTitleProps): ReactElement {
 
 	return (
 		<h1
+			aria-label={TITLE_FULL_TEXT}
 			className="text-display text-[var(--color-alabaster)] tracking-tight [font-family:var(--font-display)] [text-wrap:balance]"
 			style={{ minHeight: "2.2em", lineHeight: 1.05 }}
 		>
+			{/* Visible content — aria-hidden true durante el typewriter para evitar
+			    que el lector de pantalla narre un texto parcial. El aria-label arriba
+			    carga el contenido completo, así que la accesibilidad nunca depende
+			    del estado del typewriter. */}
 			<span aria-hidden={!done}>
 				{lineOneVisible}
 				{showLineTwo && (
@@ -96,12 +135,6 @@ function TypedTitle({ count, done }: TypedTitleProps): ReactElement {
 					}}
 				/>
 			)}
-			{/* Screen-reader accessible full title (always present) */}
-			<span className="sr-only">
-				{TITLE_LINE_ONE} {TITLE_LINE_TWO_PREFIX}
-				{TITLE_LINE_TWO_KEY}
-				{TITLE_LINE_TWO_SUFFIX}
-			</span>
 			<style>{`@keyframes theolab-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }`}</style>
 		</h1>
 	);
@@ -114,6 +147,7 @@ interface SymptomPillProps {
 }
 
 function SymptomPill({ value, active, onToggle }: SymptomPillProps): ReactElement {
+	const prefersReducedMotion = useReducedMotion();
 	return (
 		<button
 			type="button"
@@ -136,12 +170,11 @@ function SymptomPill({ value, active, onToggle }: SymptomPillProps): ReactElemen
 					viewBox="0 0 16 16"
 					fill="none"
 					aria-hidden="true"
-					initial={{ scale: 0, opacity: 0 }}
-					animate={{ scale: 1, opacity: 1 }}
-					transition={{
-						duration: 0.28,
-						ease: [0.34, 1.56, 0.64, 1],
-					}}
+					initial={prefersReducedMotion ? false : { scale: 0, opacity: 0 }}
+					animate={prefersReducedMotion ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1 }}
+					transition={
+						prefersReducedMotion ? { duration: 0 } : { duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }
+					}
 					className="h-[14px] w-[14px]"
 				>
 					<path
@@ -171,22 +204,147 @@ function HeroVeil(): ReactElement {
 	);
 }
 
-function SpliteFallback(): ReactElement {
+/* -------------------------------------------------------------------------
+ * Spline fallbacks
+ *   - SpliteSkeleton:   placeholder durante carga (Suspense).
+ *   - SpliteErrorPanel: fallback estático cuando el chunk lazy o el .splinecode
+ *                       fallan / timeout. NUNCA bloquea el resto del hero.
+ * ------------------------------------------------------------------------- */
+
+function SpliteSkeleton(): ReactElement {
 	return (
 		<div
 			className="flex h-full w-full items-center justify-center bg-[var(--color-onyx)]"
 			aria-hidden="true"
 		>
 			<span className="text-mono text-[0.65rem] text-[var(--color-fg-muted)] tracking-[0.18em] uppercase">
-				Cargando escena…
+				Cargando escena
 			</span>
 		</div>
 	);
 }
 
+interface SpliteErrorPanelProps {
+	onRetry: () => void;
+}
+
+function SpliteErrorPanel({ onRetry }: SpliteErrorPanelProps): ReactElement {
+	return (
+		<div
+			className="relative flex h-full w-full flex-col items-center justify-center gap-3 overflow-hidden bg-[var(--color-onyx)]"
+			role="img"
+			aria-label="Escena 3D no disponible"
+		>
+			{/* Hairline geométrico que llena el espacio sin caer en stock-3D fake. */}
+			<svg
+				className="absolute inset-0 h-full w-full opacity-40"
+				viewBox="0 0 200 200"
+				preserveAspectRatio="xMidYMid slice"
+				aria-hidden="true"
+			>
+				<title>Patrón decorativo</title>
+				<defs>
+					<pattern id="grid-fallback" width="20" height="20" patternUnits="userSpaceOnUse">
+						<path
+							d="M 20 0 L 0 0 0 20"
+							fill="none"
+							stroke="var(--color-divider)"
+							strokeWidth="0.5"
+						/>
+					</pattern>
+				</defs>
+				<rect width="200" height="200" fill="url(#grid-fallback)" />
+				<circle cx="100" cy="100" r="36" fill="none" stroke="var(--color-gold)" strokeWidth="0.4" />
+				<circle cx="100" cy="100" r="60" fill="none" stroke="var(--color-gold)" strokeWidth="0.3" />
+			</svg>
+			<button
+				type="button"
+				onClick={onRetry}
+				className="relative z-10 inline-flex items-center gap-2 rounded-[2px] border border-[var(--color-alabaster)]/22 bg-white/[0.05] px-4 py-2 text-mono text-[0.6875rem] uppercase tracking-[0.18em] text-[var(--color-alabaster)]/80 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-onyx)]"
+			>
+				Reintentar escena
+			</button>
+		</div>
+	);
+}
+
+/* -------------------------------------------------------------------------
+ * SpliteSlot — wrapper que enlaza ErrorBoundary + timeout + retry. El timeout
+ * dispara error sintético si la escena no notifica onLoad en SPLINE_LOAD_TIMEOUT_MS;
+ * el ErrorBoundary lo captura y rinde el fallback con retry sin matar el árbol.
+ * ------------------------------------------------------------------------- */
+
+interface SpliteSlotProps {
+	onLoad: (app: Application) => void;
+}
+
+function SpliteSlot({ onLoad }: SpliteSlotProps): ReactElement {
+	// key remount-counter — incrementar fuerza al ErrorBoundary a re-instanciar
+	// el árbol completo, re-disparando el lazy() y la descarga del .splinecode.
+	const [attempt, setAttempt] = useState(0);
+	const [timedOut, setTimedOut] = useState(false);
+
+	useEffect(() => {
+		setTimedOut(false);
+		const id = window.setTimeout(() => setTimedOut(true), SPLINE_LOAD_TIMEOUT_MS);
+		return () => window.clearTimeout(id);
+	}, []);
+
+	const handleLoad = useCallback(
+		(app: Application) => {
+			setTimedOut(false);
+			onLoad(app);
+		},
+		[onLoad],
+	);
+
+	const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+	if (timedOut) {
+		return <SpliteErrorPanel onRetry={retry} />;
+	}
+
+	return (
+		<ErrorBoundary
+			key={attempt}
+			fallback={({ retry: retryFromBoundary }) => (
+				<SpliteErrorPanel
+					onRetry={() => {
+						retryFromBoundary();
+						retry();
+					}}
+				/>
+			)}
+		>
+			<SpliteScene
+				scene={SPLINE_SCENE}
+				className="h-full w-full"
+				fallback={<SpliteSkeleton />}
+				onLoad={handleLoad}
+			/>
+		</ErrorBoundary>
+	);
+}
+
 export function HeroSplite(): ReactElement {
 	const prefersReducedMotion = useReducedMotion();
-	const [typedCount, setTypedCount] = useState<number>(prefersReducedMotion ? TITLE_TOTAL : 0);
+
+	// Typewriter
+	//
+	// CRÍTICO: el SSR debe rendear el texto COMPLETO. Si arrancamos en 0 y JS
+	// falla / es lento, el sighted user ve un h1 vacío (aria-label sigue dando
+	// el texto al SR, pero la lectura visual queda rota). Defaulteamos a
+	// TITLE_TOTAL y el useEffect rebobina sólo cuando confirmamos que motion
+	// está permitido y estamos hidratados. El flash de 1 frame es preferible
+	// a perder el contenido cuando JS no carga.
+	const [typedCount, setTypedCount] = useState<number>(TITLE_TOTAL);
+
+	// Selected symptoms — sync con URL (?sintomas=Horas,Riesgo). Inicializa
+	// vacío en SSR/primer paint y se hidrata en useEffect leyendo
+	// window.location.search directamente; el toggle escribe vía
+	// history.replaceState para no disparar navegación ni re-fetch del RSC
+	// tree. Leer window directo evita el bailout de useSearchParams() que
+	// fuerza Suspense en prerender estático.
 	const [selected, setSelected] = useState<Set<Symptom>>(() => new Set());
 
 	// Refs para el mouse-follow React. Se actualizan dentro de un RAF sin
@@ -198,9 +356,6 @@ export function HeroSplite(): ReactElement {
 	const rafRef = useRef<number | null>(null);
 
 	const handleSplineLoad = useCallback((app: Application) => {
-		// Resuelve el root del robot por name. El primer candidato que matchea
-		// es el que rotamos. El GLB importado conserva su id como name en
-		// Spline, así que `922f8171beff441b` acierta directo en este modelo.
 		for (const name of ROBOT_NAME_CANDIDATES) {
 			const obj = app.findObjectByName(name);
 			if (obj) {
@@ -210,7 +365,37 @@ export function HeroSplite(): ReactElement {
 		}
 	}, []);
 
-	// Mouse-follow React REACTIVADO.
+	// Hydrate selección desde la URL — leer al montar y suscribirse a
+	// `popstate` para reaccionar a back/forward del navegador. No usamos
+	// useSearchParams() para evitar el suspense-boundary bailout de Next.js
+	// durante prerender estático.
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+
+		const sync = () => {
+			const params = new URLSearchParams(window.location.search);
+			const next = parseSymptomsFromQuery(params.get(SYMPTOMS_QUERY_KEY));
+			setSelected((prev) => {
+				if (prev.size === next.size) {
+					let same = true;
+					for (const s of prev) {
+						if (!next.has(s)) {
+							same = false;
+							break;
+						}
+					}
+					if (same) return prev;
+				}
+				return next;
+			});
+		};
+
+		sync();
+		window.addEventListener("popstate", sync);
+		return () => window.removeEventListener("popstate", sync);
+	}, []);
+
+	// Mouse-follow React.
 	// Captura mousemove global del viewport (no del canvas), normaliza a -1..1
 	// y aplica rotación al root del robot con lerp suavizado. Esto bypasea la
 	// limitación del Mouse Look nativo de Spline que solo opera dentro del
@@ -230,28 +415,30 @@ export function HeroSplite(): ReactElement {
 		};
 
 		const tick = () => {
-			const m = mouseRef.current;
-			m.x += (m.targetX - m.x) * ROBOT_LERP;
-			m.y += (m.targetY - m.y) * ROBOT_LERP;
 			const obj = robotObjRef.current;
 			if (obj?.rotation) {
-				// Yaw: cursor a la derecha → robot mira a la derecha.
+				const m = mouseRef.current;
+				m.x += (m.targetX - m.x) * ROBOT_LERP;
+				m.y += (m.targetY - m.y) * ROBOT_LERP;
 				obj.rotation.y = m.x * ROBOT_MAX_YAW;
-				// Pitch: este modelo GLB usa `rotation.x` positivo = mirar
-				// abajo (convención opuesta a three.js estándar). Sin signo
-				// negativo para mantener correspondencia natural con el cursor.
+				// Pitch: este modelo GLB usa `rotation.x` positivo = mirar abajo
+				// (convención opuesta a three.js estándar). Sin signo negativo
+				// para mantener correspondencia natural con el cursor.
 				obj.rotation.x = m.y * ROBOT_MAX_PITCH;
 			}
 			rafRef.current = requestAnimationFrame(tick);
 		};
 
 		window.addEventListener("mousemove", handleMove, { passive: true });
-		window.addEventListener("mouseout", handleLeave);
+		// pointerleave en document es más confiable que mouseout en window;
+		// no bubblea desde hijos y dispara una sola vez cuando el cursor
+		// abandona la ventana.
+		document.addEventListener("pointerleave", handleLeave);
 		rafRef.current = requestAnimationFrame(tick);
 
 		return () => {
 			window.removeEventListener("mousemove", handleMove);
-			window.removeEventListener("mouseout", handleLeave);
+			document.removeEventListener("pointerleave", handleLeave);
 			if (rafRef.current !== null) {
 				cancelAnimationFrame(rafRef.current);
 				rafRef.current = null;
@@ -259,12 +446,17 @@ export function HeroSplite(): ReactElement {
 		};
 	}, [prefersReducedMotion]);
 
-	// Typewriter effect — chained setTimeouts respect prefers-reduced-motion.
+	// Typewriter effect — chained setTimeouts; respeta prefers-reduced-motion
+	// arrancando en TITLE_TOTAL (sin animar). En el path "motion permitido"
+	// rebobina a 0 y arranca; esto causa un flash de 1 frame (full → blank →
+	// typing) que es preferible a perder el contenido del h1 cuando JS no
+	// llega a ejecutarse.
 	useEffect(() => {
 		if (prefersReducedMotion) {
 			setTypedCount(TITLE_TOTAL);
 			return;
 		}
+		setTypedCount(0);
 		let cancelled = false;
 		let timer: ReturnType<typeof setTimeout> | null = null;
 		const tick = (n: number) => {
@@ -282,19 +474,23 @@ export function HeroSplite(): ReactElement {
 		};
 	}, [prefersReducedMotion]);
 
-	// Media query lg+ SSR-safe. Inicia null durante SSR y primer paint, se
-	// resuelve a boolean tras la hidratación. Permite montar UNA sola instancia
-	// de SpliteScene según el viewport, en vez de las dos que Tailwind
-	// `hidden`/`lg:hidden` dejaba vivas en el DOM (descargaba el .splinecode
-	// dos veces).
+	// Media query lg+ SSR-safe. Mantiene UNA sola instancia viva del
+	// SpliteScene según viewport y evita descargar el .splinecode dos veces.
+	// Fallback a addListener para Safari < 14, que no soporta addEventListener
+	// en MediaQueryList.
 	const [isLgUp, setIsLgUp] = useState<boolean | null>(null);
 	useEffect(() => {
 		if (typeof window === "undefined") return;
 		const mq = window.matchMedia("(min-width: 1024px)");
 		const update = () => setIsLgUp(mq.matches);
 		update();
-		mq.addEventListener("change", update);
-		return () => mq.removeEventListener("change", update);
+		if (typeof mq.addEventListener === "function") {
+			mq.addEventListener("change", update);
+			return () => mq.removeEventListener("change", update);
+		}
+		// Legacy fallback (Safari < 14, IE).
+		mq.addListener(update);
+		return () => mq.removeListener(update);
 	}, []);
 
 	const toggleSymptom = useCallback((value: Symptom) => {
@@ -302,6 +498,18 @@ export function HeroSplite(): ReactElement {
 			const next = new Set(prev);
 			if (next.has(value)) next.delete(value);
 			else next.add(value);
+			// Persistir en URL — replaceState evita poblar el back-stack
+			// con cada toggle y no dispara navegación del router.
+			if (typeof window !== "undefined") {
+				const url = new URL(window.location.href);
+				const serialized = serializeSymptoms(next);
+				if (serialized) {
+					url.searchParams.set(SYMPTOMS_QUERY_KEY, serialized);
+				} else {
+					url.searchParams.delete(SYMPTOMS_QUERY_KEY);
+				}
+				window.history.replaceState(window.history.state, "", url.toString());
+			}
 			return next;
 		});
 	}, []);
@@ -325,20 +533,11 @@ export function HeroSplite(): ReactElement {
 				<HeroVeil />
 
 				{/* Spline scene container — full bleed on lg, stacked beneath copy on mobile.
-			    Wider on lg+ to fit the full character; slight top offset so the
-			    head doesn't crowd the navbar. */}
-				<div className="absolute inset-0 z-0 hidden lg:block" aria-hidden="false">
+				    Wider on lg+ to fit the full character; slight top offset so la
+				    cabeza no choca con la navbar. */}
+				<div className="absolute inset-0 z-0 hidden lg:block">
 					<div className="absolute top-[clamp(56px,8vh,96px)] bottom-0 right-0 w-full lg:w-[64%] xl:w-[60%]">
-						{isLgUp === true ? (
-							<SpliteScene
-								scene={SPLINE_SCENE}
-								className="h-full w-full"
-								fallback={<SpliteFallback />}
-								onLoad={handleSplineLoad}
-							/>
-						) : (
-							<SpliteFallback />
-						)}
+						{isLgUp === true ? <SpliteSlot onLoad={handleSplineLoad} /> : <SpliteSkeleton />}
 					</div>
 				</div>
 
@@ -355,7 +554,7 @@ export function HeroSplite(): ReactElement {
 						initial="hidden"
 						animate="visible"
 						variants={stagger(0.1)}
-						className="flex flex-col gap-7 max-w-xl"
+						className="flex min-w-0 flex-col gap-7 max-w-xl"
 					>
 						<motion.div
 							variants={fadeUp}
@@ -381,7 +580,7 @@ export function HeroSplite(): ReactElement {
 						</motion.p>
 
 						{/* Pills block */}
-						<motion.div variants={fadeUp} className="flex flex-col gap-3.5 pt-2">
+						<motion.div variants={fadeUp} className="flex min-w-0 flex-col gap-3.5 pt-2">
 							<div className="flex flex-col gap-1">
 								<h2
 									className="font-semibold text-[var(--color-alabaster)]"
@@ -409,19 +608,20 @@ export function HeroSplite(): ReactElement {
 							<div role="status" aria-live="polite" className="pt-2">
 								{activeList.length === 0 ? (
 									<p className="italic text-[var(--color-alabaster)]/55 text-[0.9375rem]">
-										Seleccione lo que más le pese — sin compromiso.
+										Seleccione lo que aplique. Sin compromiso.
 									</p>
 								) : (
 									<motion.div
 										key={activeList.join("|")}
-										initial={{ opacity: 0, y: 6 }}
+										initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
 										animate={{ opacity: 1, y: 0 }}
-										transition={{
-											duration: 0.32,
-											ease: [0.16, 1, 0.3, 1],
-										}}
+										transition={
+											prefersReducedMotion
+												? { duration: 0 }
+												: { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+										}
 										className={[
-											"flex items-center gap-3 rounded-[4px] px-5 py-3.5",
+											"flex min-w-0 items-center gap-3 rounded-[4px] px-5 py-3.5",
 											"border border-[var(--color-alabaster)]/22",
 											"bg-[color-mix(in_oklab,var(--color-paper)_8%,transparent)]",
 										].join(" ")}
@@ -434,7 +634,7 @@ export function HeroSplite(): ReactElement {
 													"linear-gradient(90deg, var(--color-crimson) 0%, oklch(0.72 0.2 60) 50%, var(--color-gold) 100%)",
 											}}
 										/>
-										<p className="text-[0.9375rem] text-[var(--color-alabaster)]/85">
+										<p className="min-w-0 break-words text-[0.9375rem] text-[var(--color-alabaster)]/85">
 											<span>Reconocido. Lo abordamos en el Diagnóstico: </span>
 											<span className="text-[var(--color-gold)]">{activeList.join(", ")}</span>
 										</p>
@@ -444,18 +644,11 @@ export function HeroSplite(): ReactElement {
 						</motion.div>
 					</motion.div>
 
-					{/* Mobile / <lg Spline column — stacked under copy */}
-					<div className="relative aspect-square w-full overflow-hidden border border-[var(--color-divider)]/40 bg-[var(--color-onyx)] lg:hidden">
-						{isLgUp === false ? (
-							<SpliteScene
-								scene={SPLINE_SCENE}
-								className="h-full w-full"
-								fallback={<SpliteFallback />}
-								onLoad={handleSplineLoad}
-							/>
-						) : (
-							<SpliteFallback />
-						)}
+					{/* Mobile / <lg Spline column — stacked under copy. aspect 4/5
+					   en vez de square mantiene el robot legible sin comerse el
+					   viewport en pantallas chicas (~ 320-360 px de ancho). */}
+					<div className="relative aspect-[4/5] w-full max-h-[60svh] overflow-hidden border border-[var(--color-divider)]/40 bg-[var(--color-onyx)] lg:hidden">
+						{isLgUp === false ? <SpliteSlot onLoad={handleSplineLoad} /> : <SpliteSkeleton />}
 					</div>
 
 					{/* Right column placeholder — keeps grid balance on lg; actual scene

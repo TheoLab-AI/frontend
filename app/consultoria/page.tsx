@@ -59,8 +59,9 @@ export default function ConsultoriaPage(): ReactElement {
 				id="diagnostico"
 				eyebrow="Lo que se lleva"
 				title="«El Diagnóstico» no es un PDF. Es un activo."
-				note="Próximamente — sticky scroll MAPEAR / PRIORIZAR / ENTREGAR (PR5)."
+				note="Tres entregables concretos: mapa de brechas, priorización por impacto y plan de acción con responsables. El detalle completo se publica en las próximas semanas."
 				tone="alabaster"
+				cta={{ label: "Agendar la reunión de introducción", href: "#cta" }}
 			/>
 
 			{/* F05 — Diferenciadores */}
@@ -86,12 +87,18 @@ export default function ConsultoriaPage(): ReactElement {
  * lea como una secuencia coherente aunque dos secciones estén pendientes.
  * ------------------------------------------------------------------------- */
 
+interface SectionPlaceholderCta {
+	label: string;
+	href: string;
+}
+
 interface SectionPlaceholderProps {
 	id: string;
 	eyebrow: string;
 	title: string;
 	note: string;
 	tone: "onyx" | "alabaster";
+	cta?: SectionPlaceholderCta;
 }
 
 function SectionPlaceholder({
@@ -100,6 +107,7 @@ function SectionPlaceholder({
 	title,
 	note,
 	tone,
+	cta,
 }: SectionPlaceholderProps): ReactElement {
 	const isDark = tone === "onyx";
 	const bg = isDark ? "var(--color-onyx)" : "var(--color-alabaster)";
@@ -147,6 +155,16 @@ function SectionPlaceholder({
 					>
 						{note}
 					</motion.p>
+					{cta && (
+						<motion.a
+							variants={fadeUp}
+							href={cta.href}
+							className="self-start text-body font-medium underline underline-offset-4 decoration-[var(--color-crimson)] transition-opacity duration-200 hover:opacity-70"
+							style={{ color: fg }}
+						>
+							{cta.label}
+						</motion.a>
+					)}
 				</motion.div>
 			</div>
 		</section>

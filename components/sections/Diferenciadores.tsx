@@ -53,12 +53,6 @@ export function Diferenciadores(): ReactElement {
 				>
 					{/* Header */}
 					<motion.div variants={fadeUp} className="flex flex-col gap-5 max-w-3xl">
-						<div className="flex items-center gap-3 text-meta uppercase tracking-[0.22em] text-[var(--color-slate)]">
-							<span aria-hidden="true" className="text-[var(--color-crimson)]">
-								●
-							</span>
-							<span>Diferenciadores</span>
-						</div>
 						<h2
 							id="diferenciadores-headline"
 							className="text-headline text-[var(--color-onyx)] [text-wrap:balance]"
