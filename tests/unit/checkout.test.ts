@@ -84,6 +84,18 @@ describe("procesarCheckout", () => {
 		expect(res).toMatchObject({ message: expect.stringContaining("WhatsApp") });
 	});
 
+	it("si enviarTransaccional falla tras registrarLead exitoso, no silencia: ok:false y el lead sí se registró", async () => {
+		const email = fakeEmail({
+			enviarTransaccional: vi.fn(async () => {
+				throw new Error("smtp down");
+			}),
+		});
+		const res = await procesarCheckout(validInput, email);
+		expect(res.ok).toBe(false);
+		expect(res).toMatchObject({ message: expect.stringContaining("WhatsApp") });
+		expect(email.registrarLead).toHaveBeenCalledTimes(1);
+	});
+
 	it("usa fuente 'web' por defecto si no viene", async () => {
 		const email = fakeEmail();
 		await procesarCheckout({ ...validInput, fuente: "" }, email);

@@ -72,7 +72,8 @@ export async function procesarCheckout(
 			template: "notificacion-interna",
 			data: { nombre: input.nombre.trim(), empresa: input.empresa.trim(), plan, precio, edicion },
 		});
-	} catch {
+	} catch (error) {
+		console.error("[checkout] procesarCheckout falló al registrar el lead:", error);
 		return { ok: false, message: FALLBACK_MSG };
 	}
 	return { ok: true };
