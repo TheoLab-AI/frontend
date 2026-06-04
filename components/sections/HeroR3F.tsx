@@ -283,7 +283,7 @@ export function HeroR3F(): ReactElement {
 				variant="dark"
 				padding="none"
 				overflow="hidden"
-				className="relative isolate min-h-[108svh] border-b border-[var(--color-divider)]"
+				className="relative isolate min-h-[100svh] max-h-screen border-b border-[var(--color-divider)] overflow-hidden"
 			>
 				{/* Top-left gold spotlight (z-[1]) */}
 				<Spotlight fill="var(--color-gold)" className="-top-[24%] -left-[12%] z-[1]" />
@@ -307,9 +307,9 @@ export function HeroR3F(): ReactElement {
 				{/* Foreground content (z-10) */}
 				<div
 					className={[
-						"container-brand relative z-10 grid gap-10",
-						"pt-[clamp(96px,12vh,132px)] pb-12",
-						"items-center lg:grid-cols-2 lg:gap-8",
+						"container-brand relative z-10 grid gap-6 lg:gap-8",
+						"pt-[clamp(72px,9vh,104px)] pb-8",
+						"items-center lg:grid-cols-2 min-h-[100svh]",
 					].join(" ")}
 				>
 					{/* Left column — copy stack */}
@@ -317,7 +317,7 @@ export function HeroR3F(): ReactElement {
 						initial="hidden"
 						animate="visible"
 						variants={stagger(0.1)}
-						className="flex flex-col gap-7 max-w-xl"
+						className="flex flex-col gap-5 lg:gap-6 max-w-xl"
 					>
 						<motion.div
 							variants={fadeUp}

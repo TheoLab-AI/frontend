@@ -149,15 +149,15 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 				<CameraIntro />
 
 				<Environment preset="studio" background={false} />
-				{/* Encuadre tipo medium-shot (corte intencional por las piernas):
-				    scale 1.8 + position Y=-0.7 → robot va Y=-0.7 a Y=1.1 (1.8 u alto).
+				{/* Encuadre medium-close-shot — corte por las rodillas:
+				    scale 2.2 + position Y=-1.1 → robot va Y=-1.1 a Y=1.1 (2.2 u alto).
 				    Cámara a Z=3.5 fov 30 da frustum vertical -0.44 a 1.44 (a Z=0).
-				    Robot visible: Y=-0.44 a Y=1.1 → cortado por abajo (pies + parte
-				    de las piernas fuera del frame, ~15% del robot), cabeza arriba
-				    con aire (~0.34 u sobre la cabeza). Similar a la referencia
-				    21st.dev/bundled/1166: personaje contenido en el card, no body
-				    shot completo. */}
-				<group scale={1.8} position={[0, -0.7, 0]}>
+				    Robot visible: Y=-0.44 a Y=1.1 → cortado el bottom 30% del robot
+				    (pies + pantorrillas + parte baja del muslo), que en proporción
+				    humanoide corresponde aproximadamente al corte por las rodillas.
+				    Cabeza en Y=1.1 con 0.34 u de aire arriba — espacio editorial
+				    sin que la cabeza toque el borde superior del frame. */}
+				<group scale={2.2} position={[0, -1.1, 0]}>
 					<RobotLookAt mouseRef={mouseRef} enabled={lookAtEnabled} />
 				</group>
 				{/* ContactShadows desactivadas en medium-shot: los pies están fuera
