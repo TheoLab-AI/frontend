@@ -110,8 +110,16 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 		};
 	}, [actions]);
 
-	// 3. LookAt aplicado ENCIMA de la animación (priority={1} corre después
-	//    del mixer.update interno de useAnimations, que usa priority 0).
+	// 3. LookAt aplicado ENCIMA de la animación.
+	//
+	//    Importante: NO pasar renderPriority (segundo arg de useFrame). Pasar
+	//    priority > 0 desactiva el render loop automático de R3F (Canvas no
+	//    llama gl.render por sí solo cuando hay useFrames con priority > 0).
+	//    En su lugar, dejamos priority default (0) y nos apoyamos en el orden
+	//    de declaración: este useFrame se registra DESPUÉS del useAnimations
+	//    de arriba, así que se ejecuta después del mixer.update() interno —
+	//    el head.quaternion ya tiene la rotación de la animación cuando
+	//    llegamos aquí, y multiplicamos el delta del LookAt encima.
 	useFrame(() => {
 		if (!enabled) return;
 		const head = headRef.current;
@@ -133,7 +141,7 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 		// head.quaternion ya contiene la rotación de la animación en este frame.
 		// Multiplicamos para sumar el delta del LookAt SIN sobrescribir la animation.
 		head.quaternion.multiply(tmpQuat.current);
-	}, 1);
+	});
 
 	return <primitive object={scene} />;
 }
