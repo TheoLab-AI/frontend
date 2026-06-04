@@ -46,6 +46,7 @@ export function createMailerLiteService(
 		async registrarLead(c: LeadContact): Promise<void> {
 			const groups = [c.plan === "inicial" ? config.groupInicial : config.groupCompleta];
 			if (c.edicion === "fundador") groups.push(config.groupFundador);
+			// precio no se mapea como custom field en Fase 1: viaja en la notificación interna (enviarTransaccional).
 			await postSubscriber({
 				email: c.email,
 				fields: {
@@ -62,6 +63,7 @@ export function createMailerLiteService(
 				groups,
 			});
 		},
+		// Fase 1 (MailerLite): la notificación interna se enruta por grupo; el discriminador `template` lo usará el adapter Resend en Fase 2.
 		async enviarTransaccional(m: TransactionalMessage): Promise<void> {
 			await postSubscriber({
 				email: m.to,
