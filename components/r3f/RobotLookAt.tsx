@@ -1,40 +1,57 @@
 "use client";
 
-import { useGLTF } from "@react-three/drei";
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { type MutableRefObject, type ReactElement, useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /* =========================================================================
- * RobotLookAt — Robot R3F con LookAt al mouse sobre el head bone
+ * RobotLookAt — Robot R3F con Mixamo idle animation + LookAt al mouse
  *
- * Carga el GLB rigged desde /public/models/robot.glb. El rig tiene naming
- * Tripo (no Mixamo): el bone de cabeza se llama `tripo::Head_0` (sub-bone
- * `tripo::Head_1` cuelga de él). Se rota EL bone — no el group entero —
- * para que solo la cabeza siga al mouse, dejando el resto del cuerpo en
- * pose natural.
+ * El GLB en /public/models/robot.glb fue re-rigeado en Mixamo (Auto-Rigger)
+ * con la animación "Standing With Briefcase Idle" bakeada. Ya NO usa el rig
+ * Prism v2.5 con naming Tripo de Fase 2 — ese se descartó porque NO era
+ * compatible plug-and-play con animaciones Mixamo (estructura distinta de
+ * bones, sin dedos, sin subdivisión de columna).
  *
- * El parent (HeroR3F) captura mousemove global y normaliza a -1..1 en un
- * ref mutable. Aquí dentro del Canvas, `useFrame` consume ese ref con lerp
- * suave (ROBOT_LERP) y aplica el delta como quaternion local sobre la pose
- * base del bone (preservando el rest pose del rig).
+ * El rig actual:
+ *   - 52 bones con naming mixamorig (`mixamorig:Head`, `mixamorig:Spine`,
+ *     `mixamorig:LeftArm`, etc.)
+ *   - 1 animation clip: "mixamo.com" (53 channels, ~14 s, 16,692 keyframes)
+ *   - Optimizado con meshopt + WebP 2K: 81 MB → 15 MB (-81%)
  *
- * Amplitudes deliberadamente más conservadoras que el Spline original
- * (yaw 0.42 vs 0.55, pitch 0.22 vs 0.28) porque ahora rota SOLO la cabeza,
- * no el cuerpo entero — los ángulos se notan más con menos rotación.
+ * Estrategia de composición de movimiento:
  *
- * `enabled=false` (prefers-reduced-motion) congela la cabeza en su rest pose.
+ *   1. `useAnimations` de drei reproduce el clip "mixamo.com" en loop.
+ *      Esto mueve TODOS los bones incluyendo el head, el cuerpo respira,
+ *      cambia peso entre piernas, y la mano simula sostener un maletín.
+ *
+ *   2. `useFrame` con `priority={1}` se ejecuta DESPUÉS de mixer.update()
+ *      (drei usa priority 0 por default). Aquí encima de la pose del clip,
+ *      sumo una rotación al head bone para que la cabeza siga al mouse.
+ *      `head.quaternion.multiply(deltaQuat)` aplica el LookAt encima de
+ *      la rotación de la animación, sin sobreescribirla.
+ *
+ *   3. Resultado: el cuerpo y la cabeza tienen el "alma" de la animación
+ *      Mixamo (movimientos sutiles humanos baked por animador profesional),
+ *      Y la cabeza adicionalmente sigue al cursor en tiempo real. Las dos
+ *      capas se combinan sin pelearse.
+ *
+ * `enabled=false` (prefers-reduced-motion): desactiva SOLO el LookAt. La
+ * animación Mixamo sigue corriendo porque es el "idle natural" del personaje,
+ * no es disruptivo.
  * ========================================================================= */
 
 const MODEL_URL = "/models/robot.glb";
-const HEAD_BONE_NAME = "tripo::Head_0";
+const HEAD_BONE_NAME = "mixamorig:Head";
+const ANIMATION_NAME = "mixamo.com";
 
 const HEAD_MAX_YAW = 0.42;
 const HEAD_MAX_PITCH = 0.22;
 const HEAD_LERP = 0.09;
 
-// El modelo PBR usa EXT_meshopt_compression — drei v10 trae el decoder built-in
-// cuando se pasa `true` como tercer arg.
+// El GLB usa EXT_meshopt_compression + EXT_texture_webp — drei v10 trae los
+// decoders built-in cuando se pasa `true` como tercer arg.
 useGLTF.preload(MODEL_URL, undefined, true);
 
 export interface MouseFollowRef {
@@ -50,54 +67,73 @@ interface RobotLookAtProps {
 }
 
 export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): ReactElement {
-	const { scene } = useGLTF(MODEL_URL, undefined, true);
+	const { scene, animations } = useGLTF(MODEL_URL, undefined, true);
+	const { actions } = useAnimations(animations, scene);
+
 	const headRef = useRef<THREE.Object3D | null>(null);
-	const baseQuatRef = useRef<THREE.Quaternion | null>(null);
 
 	// Buffers persistentes para evitar allocaciones en cada frame.
 	const tmpEuler = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
 	const tmpQuat = useRef(new THREE.Quaternion());
 
+	// 1. Resolver el head bone una sola vez al montar.
 	useEffect(() => {
-		// Wrapper objeto para evitar el narrowing de TS5 sobre `let` mutado
-		// dentro del closure de `traverse` (que infiere `never` al salir).
 		const result: { node: THREE.Object3D | null } = { node: null };
 		scene.traverse((obj) => {
 			if (obj.name === HEAD_BONE_NAME) result.node = obj;
 		});
 		headRef.current = result.node;
-		if (result.node) {
-			baseQuatRef.current = result.node.quaternion.clone();
-		} else if (process.env.NODE_ENV !== "production") {
+		if (!result.node && process.env.NODE_ENV !== "production") {
 			// eslint-disable-next-line no-console
 			console.warn(
-				`[RobotLookAt] Head bone "${HEAD_BONE_NAME}" no encontrado en el GLB. ` +
-					`LookAt deshabilitado. Bones disponibles en runtime: usa scene.traverse para inspeccionar.`,
+				`[RobotLookAt] Head bone "${HEAD_BONE_NAME}" no encontrado. LookAt deshabilitado.`,
 			);
 		}
 	}, [scene]);
 
+	// 2. Reproducir el clip Mixamo en loop al montar.
+	useEffect(() => {
+		const action = actions[ANIMATION_NAME];
+		if (!action) {
+			if (process.env.NODE_ENV !== "production") {
+				// eslint-disable-next-line no-console
+				console.warn(
+					`[RobotLookAt] Animation clip "${ANIMATION_NAME}" no encontrado. ` +
+						`Clips disponibles: ${Object.keys(actions).join(", ") || "(ninguno)"}`,
+				);
+			}
+			return;
+		}
+		action.reset().fadeIn(0.4).play();
+		return () => {
+			action.fadeOut(0.2);
+		};
+	}, [actions]);
+
+	// 3. LookAt aplicado ENCIMA de la animación (priority={1} corre después
+	//    del mixer.update interno de useAnimations, que usa priority 0).
 	useFrame(() => {
 		if (!enabled) return;
 		const head = headRef.current;
-		const baseQuat = baseQuatRef.current;
-		if (!head || !baseQuat) return;
+		if (!head) return;
 
 		const m = mouseRef.current;
 		m.x += (m.targetX - m.x) * HEAD_LERP;
 		m.y += (m.targetY - m.y) * HEAD_LERP;
 
-		// Yaw a la derecha cuando el cursor va a la derecha; pitch hacia abajo
-		// cuando el cursor sube. El signo del pitch se invierte respecto al cursor
-		// raw (cursor sube = clientY baja = m.y negativo, pero queremos que la
-		// cabeza se incline ARRIBA = rotation.x positivo en el bone local-frame).
+		// Yaw a la derecha cuando el cursor va a la derecha; pitch hacia arriba
+		// cuando el cursor sube. m.y es positivo abajo (clientY), por eso lo
+		// negamos para que rotation.x positivo = cabeza arriba.
 		const yaw = m.x * HEAD_MAX_YAW;
 		const pitch = -m.y * HEAD_MAX_PITCH;
 
 		tmpEuler.current.set(pitch, yaw, 0, "YXZ");
 		tmpQuat.current.setFromEuler(tmpEuler.current);
-		head.quaternion.copy(baseQuat).multiply(tmpQuat.current);
-	});
+
+		// head.quaternion ya contiene la rotación de la animación en este frame.
+		// Multiplicamos para sumar el delta del LookAt SIN sobrescribir la animation.
+		head.quaternion.multiply(tmpQuat.current);
+	}, 1);
 
 	return <primitive object={scene} />;
 }

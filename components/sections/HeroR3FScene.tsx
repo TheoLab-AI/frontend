@@ -89,12 +89,17 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 
 			<Suspense fallback={null}>
 				<Environment preset="studio" background={false} />
-				{/* GLB de Prism viene mirando +Z natural — sin rotación extra del group */}
-				<group>
+				{/* Group scale 1.8 compensa la escala del rig Mixamo recién
+				    convertido (bbox ~1.0 u alto en el GLB original) para llevar al
+				    robot a ~1.8 u de altura, proporción humanoide bien encuadrada
+				    con la cámara fov 30 a Z=5. position Y=-0.9 centra los pies del
+				    robot en el plano Y=0 (donde se proyectan las ContactShadows).
+				    Sin rotación extra: el rig Mixamo viene mirando +Z natural. */}
+				<group scale={1.8} position={[0, -0.9, 0]}>
 					<RobotLookAt mouseRef={mouseRef} enabled={lookAtEnabled} />
 				</group>
 				<ContactShadows
-					position={[0, -0.5, 0]}
+					position={[0, -0.9, 0]}
 					opacity={0.55}
 					scale={6}
 					blur={2.6}
