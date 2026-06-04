@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactShadows, Environment } from "@react-three/drei";
+import { Environment } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, SMAA } from "@react-three/postprocessing";
 import { type MutableRefObject, type ReactElement, Suspense, useRef } from "react";
@@ -26,9 +26,14 @@ function CameraIntro(): null {
 	const startTimeRef = useRef<number | null>(null);
 	const completedRef = useRef<boolean>(false);
 
-	const DURATION = 2.5;
-	const Z_START = 2.5;
-	const Z_END = 5.0;
+	// Duración 3.0 s — más perceptible. Cubic ease-out (slow finish) da
+	// sensación de "frenado cinematográfico" al llegar al encuadre final.
+	const DURATION = 3.0;
+	// Z_START 1.8: close-up bust (solo cabeza + parte alta del torso).
+	// Z_END 3.5: medium shot (cabeza + torso + cintura, piernas cortadas).
+	// La cámara mira a (0, 0.5, 0) → centro del frame visual.
+	const Z_START = 1.8;
+	const Z_END = 3.5;
 
 	useFrame((state) => {
 		if (completedRef.current) return;
@@ -42,7 +47,7 @@ function CameraIntro(): null {
 
 		const elapsed = state.clock.elapsedTime - startTimeRef.current;
 		const t = Math.min(1, elapsed / DURATION);
-		// Ease-out cubic: 1 - (1-t)^3
+		// Ease-out cubic: 1 - (1-t)^3 — empieza rápido, frena suave al final.
 		const eased = 1 - (1 - t) ** 3;
 		const z = Z_START + (Z_END - Z_START) * eased;
 
@@ -114,7 +119,7 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 				powerPreference: "high-performance",
 				alpha: true,
 			}}
-			camera={{ position: [0, 0.5, 5.0], fov: 30 }}
+			camera={{ position: [0, 0.5, 3.5], fov: 30 }}
 			shadows
 			style={{ background: "transparent" }}
 		>
@@ -135,28 +140,29 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 			<directionalLight position={[-3.5, 1.2, 2.5]} intensity={0.5} color="#a0c4ff" />
 			<directionalLight position={[0, -0.2, -5]} intensity={1.1} color="#f6c060" />
 
-			{/* Cámara dolly-out de entrada: close-up (Z=2.5) → cuerpo entero (Z=5.0) */}
-			<CameraIntro />
-
 			<Suspense fallback={null}>
+				{/* CameraIntro DENTRO del Suspense para que la animación de entrada
+				    comience SOLO cuando el GLB ya cargó. Si estuviera fuera del
+				    Suspense, los 3 s de dolly-out arrancarían en cuanto el Canvas
+				    monta (antes del fetch del GLB de 15 MB) — para cuando el robot
+				    se ve, la animación ya habría terminado. */}
+				<CameraIntro />
+
 				<Environment preset="studio" background={false} />
-				{/* Group scale 1.4 (bajado de 1.8 anterior que sacaba los pies fuera
-				    del frustum vertical) lleva al robot Mixamo a ~1.4 u de altura.
-				    position Y=-0.2 centra el robot verticalmente con la cámara que
-				    mira a (0, 0.5, 0) — robot va Y=-0.2 a Y=1.2, cabe con margen en
-				    frustum vertical (Y=-0.84 a Y=1.84 a Z=0 con fov 30 desde Z=5).
-				    Sin rotación extra: el rig Mixamo viene mirando +Z natural. */}
-				<group scale={1.4} position={[0, -0.2, 0]}>
+				{/* Encuadre tipo medium-shot (corte intencional por las piernas):
+				    scale 1.8 + position Y=-0.7 → robot va Y=-0.7 a Y=1.1 (1.8 u alto).
+				    Cámara a Z=3.5 fov 30 da frustum vertical -0.44 a 1.44 (a Z=0).
+				    Robot visible: Y=-0.44 a Y=1.1 → cortado por abajo (pies + parte
+				    de las piernas fuera del frame, ~15% del robot), cabeza arriba
+				    con aire (~0.34 u sobre la cabeza). Similar a la referencia
+				    21st.dev/bundled/1166: personaje contenido en el card, no body
+				    shot completo. */}
+				<group scale={1.8} position={[0, -0.7, 0]}>
 					<RobotLookAt mouseRef={mouseRef} enabled={lookAtEnabled} />
 				</group>
-				<ContactShadows
-					position={[0, -0.2, 0]}
-					opacity={0.55}
-					scale={6}
-					blur={2.6}
-					far={1.5}
-					color="#000000"
-				/>
+				{/* ContactShadows desactivadas en medium-shot: los pies están fuera
+				    del frame, una sombra al ras del piso (que tampoco se ve) no
+				    aporta y puede generar artefactos en el borde inferior. */}
 			</Suspense>
 
 			<EffectComposer multisampling={8}>

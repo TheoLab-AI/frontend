@@ -42,7 +42,11 @@ import * as THREE from "three";
  * no es disruptivo.
  * ========================================================================= */
 
-const MODEL_URL = "/models/robot.glb";
+// Path con sufijo "-mixamo" para forzar cache-bust en el browser: el GLB
+// anterior (rig Prism Tripo, 5.16 MB, sin animation) tenía path /models/robot.glb
+// y Vercel lo sirve con cache-control de 1 año. Cambiar el path obliga al
+// browser a fetchear el nuevo asset Mixamo (15 MB con animation + rig completo).
+const MODEL_URL = "/models/robot-mixamo.glb";
 const HEAD_BONE_NAME = "mixamorig:Head";
 const ANIMATION_NAME = "mixamo.com";
 
