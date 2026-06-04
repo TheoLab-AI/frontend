@@ -90,17 +90,25 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 
 	// 1. Resolver el head bone una sola vez al montar.
 	useEffect(() => {
+		// Buscar primero por nombre exacto. Si no, fallback por substring
+		// (defensa contra futuras normalizaciones de naming del loader).
 		const result: { node: THREE.Object3D | null } = { node: null };
 		scene.traverse((obj) => {
 			if (obj.name === HEAD_BONE_NAME) result.node = obj;
 		});
-		headRef.current = result.node;
-		if (!result.node && process.env.NODE_ENV !== "production") {
-			// eslint-disable-next-line no-console
-			console.warn(
-				`[RobotLookAt] Head bone "${HEAD_BONE_NAME}" no encontrado. LookAt deshabilitado.`,
-			);
+		if (!result.node) {
+			scene.traverse((obj) => {
+				if (!result.node && obj.name?.toLowerCase().endsWith("head")) {
+					result.node = obj;
+				}
+			});
 		}
+		headRef.current = result.node;
+		// Log único al mount para confirmar fix sin spammear consola en producción.
+		// eslint-disable-next-line no-console
+		console.log(
+			`[RobotLookAt] head bone: ${result.node ? `FOUND ("${result.node.name}")` : "NOT FOUND"}`,
+		);
 	}, [scene]);
 
 	// 2. Reproducir el clip Mixamo en loop al montar.
@@ -153,6 +161,11 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 		// head.quaternion ya contiene la rotación de la animación en este frame.
 		// Multiplicamos para sumar el delta del LookAt SIN sobrescribir la animation.
 		head.quaternion.multiply(tmpQuat.current);
+
+		// Forzar el recalculo de la matriz mundial del bone + sus children.
+		// Sin esto, el skinning del SkinnedMesh puede usar la matriz vieja del
+		// frame anterior, ignorando nuestra mutación al quaternion.
+		head.updateMatrixWorld(true);
 	});
 
 	return <primitive object={scene} />;

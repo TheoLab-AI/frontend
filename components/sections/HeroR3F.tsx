@@ -117,7 +117,7 @@ function AnimatedTitle(): ReactElement {
 			initial="hidden"
 			animate="visible"
 			variants={containerVariants}
-			className="text-display text-[var(--color-alabaster)] tracking-tight [font-family:var(--font-display)] [text-wrap:balance]"
+			className="text-[var(--color-alabaster)] tracking-tight [font-family:var(--font-display)] [text-wrap:balance] font-bold text-[clamp(2.25rem,4.5vw,3.5rem)]"
 			style={{ lineHeight: 1.05 }}
 		>
 			<span className="block">{TITLE_LINE_ONE_WORDS.map((w, i) => renderWord(w, `l1-${i}`))}</span>
@@ -283,7 +283,7 @@ export function HeroR3F(): ReactElement {
 				variant="dark"
 				padding="none"
 				overflow="hidden"
-				className="relative isolate min-h-[100svh] max-h-screen border-b border-[var(--color-divider)] overflow-hidden"
+				className="relative isolate h-screen border-b border-[var(--color-divider)] overflow-hidden"
 			>
 				{/* Top-left gold spotlight (z-[1]) */}
 				<Spotlight fill="var(--color-gold)" className="-top-[24%] -left-[12%] z-[1]" />
@@ -307,9 +307,9 @@ export function HeroR3F(): ReactElement {
 				{/* Foreground content (z-10) */}
 				<div
 					className={[
-						"container-brand relative z-10 grid gap-6 lg:gap-8",
-						"pt-[clamp(72px,9vh,104px)] pb-8",
-						"items-center lg:grid-cols-2 min-h-[100svh]",
+						"container-brand relative z-10 grid gap-4 lg:gap-6",
+						"pt-[clamp(56px,7vh,88px)] pb-6",
+						"items-center lg:grid-cols-2 h-full",
 					].join(" ")}
 				>
 					{/* Left column — copy stack */}
@@ -317,7 +317,7 @@ export function HeroR3F(): ReactElement {
 						initial="hidden"
 						animate="visible"
 						variants={stagger(0.1)}
-						className="flex flex-col gap-5 lg:gap-6 max-w-xl"
+						className="flex flex-col gap-4 lg:gap-5 max-w-xl"
 					>
 						<motion.div
 							variants={fadeUp}

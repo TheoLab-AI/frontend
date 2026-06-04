@@ -29,11 +29,11 @@ function CameraIntro(): null {
 	// Duración 3.0 s — más perceptible. Cubic ease-out (slow finish) da
 	// sensación de "frenado cinematográfico" al llegar al encuadre final.
 	const DURATION = 3.0;
-	// Z_START 1.8: close-up bust (solo cabeza + parte alta del torso).
-	// Z_END 3.5: medium shot (cabeza + torso + cintura, piernas cortadas).
+	// Z_START 2.5: medium close-up (cabeza + torso + parte de brazos).
+	// Z_END 4.5: cuerpo casi entero con aire arriba (cabeza no toca borde).
 	// La cámara mira a (0, 0.5, 0) → centro del frame visual.
-	const Z_START = 1.8;
-	const Z_END = 3.5;
+	const Z_START = 2.5;
+	const Z_END = 4.5;
 
 	useFrame((state) => {
 		if (completedRef.current) return;
@@ -114,12 +114,12 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 			gl={{
 				antialias: true,
 				toneMapping: THREE.ACESFilmicToneMapping,
-				toneMappingExposure: 1.0,
+				toneMappingExposure: 0.85,
 				outputColorSpace: THREE.SRGBColorSpace,
 				powerPreference: "high-performance",
 				alpha: true,
 			}}
-			camera={{ position: [0, 0.5, 3.5], fov: 30 }}
+			camera={{ position: [0, 0.5, 4.5], fov: 30 }}
 			shadows
 			style={{ background: "transparent" }}
 		>
@@ -136,17 +136,22 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 			    Fill: fría desde izquierda (sin cambio). Define el contorno.
 			    Rim: cálido trasero más sutil (0.7 vs 1.1) — halo dorado
 			    sin saturación. */}
-			<ambientLight intensity={0.4} />
+			{/* Iluminación más mate — el traje PBR cyborg tiene material muy
+			    reflejante, las luces direccionales fuertes lo convierten en
+			    espejo. Bajamos intensities y subimos ambient para compensar.
+			    Cámbiamos a colores más neutros (menos cálidos) para reducir
+			    el rebote dorado del especular. */}
+			<ambientLight intensity={0.55} />
 			<directionalLight
 				position={[3.5, 5.5, 2]}
-				intensity={1.1}
-				color="#fff4dc"
+				intensity={0.7}
+				color="#f0f0f0"
 				castShadow
 				shadow-mapSize={[2048, 2048]}
 				shadow-bias={-0.0001}
 			/>
-			<directionalLight position={[-3.5, 1.2, 2.5]} intensity={0.45} color="#a0c4ff" />
-			<directionalLight position={[0, -0.2, -5]} intensity={0.7} color="#f6c060" />
+			<directionalLight position={[-3.5, 1.2, 2.5]} intensity={0.35} color="#b8c8e0" />
+			<directionalLight position={[0, -0.2, -5]} intensity={0.4} color="#e0c898" />
 
 			<Suspense fallback={null}>
 				{/* CameraIntro DENTRO del Suspense para que la animación de entrada
@@ -157,15 +162,14 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 				<CameraIntro />
 
 				<Environment preset="studio" background={false} />
-				{/* Encuadre medium-close-shot — corte por las rodillas:
-				    scale 2.2 + position Y=-1.1 → robot va Y=-1.1 a Y=1.1 (2.2 u alto).
-				    Cámara a Z=3.5 fov 30 da frustum vertical -0.44 a 1.44 (a Z=0).
-				    Robot visible: Y=-0.44 a Y=1.1 → cortado el bottom 30% del robot
-				    (pies + pantorrillas + parte baja del muslo), que en proporción
-				    humanoide corresponde aproximadamente al corte por las rodillas.
-				    Cabeza en Y=1.1 con 0.34 u de aire arriba — espacio editorial
-				    sin que la cabeza toque el borde superior del frame. */}
-				<group scale={2.2} position={[0, -1.1, 0]}>
+				{/* Encuadre cuerpo casi entero con aire arriba — referencia del demo
+				    21st.dev: scale 1.7 + position Y=-0.7 → robot va Y=-0.7 a Y=1.0
+				    (1.7 u alto). Cámara a Z=4.5 fov 30 da frustum vertical -0.71 a
+				    1.71 (a Z=0). Robot visible: Y=-0.7 a Y=1.0 → cabeza con 0.71 u
+				    de aire arriba (no toca borde superior), pies en el borde inferior
+				    o levemente cortados. Cuerpo bien proporcionado en el frame
+				    derecho del hero. */}
+				<group scale={1.7} position={[0, -0.7, 0]}>
 					<RobotLookAt mouseRef={mouseRef} enabled={lookAtEnabled} />
 				</group>
 				{/* ContactShadows desactivadas en medium-shot: los pies están fuera
