@@ -41,7 +41,7 @@ export function HomeCTA() {
 
 					<motion.div variants={fadeUp}>
 						<Link
-							href="/consultoria"
+							href="/consultoria-legal"
 							className="
 								group inline-flex items-center gap-2
 								text-meta text-[var(--color-fg-muted)]

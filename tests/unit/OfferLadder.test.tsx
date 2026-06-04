@@ -25,9 +25,13 @@ describe("OfferLadder", () => {
 		expect(container.textContent).toContain("$500.000");
 		expect(container.textContent).toContain("$1.500.000");
 	});
-	it("NO expone el precio fundador (interno)", () => {
+	// Edición fundadora PÚBLICA (decisión de empresa 2026-06-03): el home muestra
+	// el split regular/fundador anclado. Retiro = quitar founderPrice en lib/oferta.
+	it("expone el split de la edición fundadora (regular tachado + fundador)", () => {
 		const { container } = render(<OfferLadder />);
-		expect(container.textContent).not.toContain("$200.000");
+		expect(container.textContent).toContain("$200.000");
+		expect(container.textContent).toContain("$1.200.000");
+		expect(container.textContent).toContain("Fundador · 10 cupos");
 	});
 	it("presenta los tres peldaños", () => {
 		const { container } = render(<OfferLadder />);

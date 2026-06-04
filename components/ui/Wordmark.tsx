@@ -14,8 +14,15 @@ const sizeClasses: Record<NonNullable<WordmarkProps["size"]>, string> = {
 };
 
 /**
- * TheoLab wordmark — "Theo" in onyx + "Lab" with painted crimson→gold gradient.
- * Brand v0.3 rule: Pascal-case, Inter Tight 700, gradient on "Lab".
+ * TheoLab wordmark — "Theo" hereda el color del contexto (currentColor) + "Lab"
+ * con gradiente pintado crimson→gold. Brand v0.3: Pascal-case, Inter Tight 700,
+ * gradiente en "Lab".
+ *
+ * "Theo" usa `currentColor` (no un color fijo) para adaptarse al tema del
+ * contenedor: oscuro sobre el header/hero claros, alabaster sobre los onyx. Un
+ * color fijo dejaba "Theo" invisible (oscuro sobre oscuro) en el header onyx de
+ * /consultoria-legal. El contenedor define el color; pásalo por `className` si
+ * el contexto no lo hereda.
  */
 export function Wordmark({ className, size = "md", as: Tag = "span" }: WordmarkProps) {
 	return (
@@ -23,7 +30,6 @@ export function Wordmark({ className, size = "md", as: Tag = "span" }: WordmarkP
 			aria-label="TheoLab"
 			className={cn(
 				"inline-flex font-display font-bold leading-none [font-family:var(--font-display)]",
-				"text-[var(--color-fg)]",
 				sizeClasses[size],
 				className,
 			)}

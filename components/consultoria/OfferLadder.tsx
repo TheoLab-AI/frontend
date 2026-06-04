@@ -75,7 +75,9 @@ function StepCard({ step, index }: { step: Step; index: number }) {
 				</p>
 			) : null}
 
-			{/* Two-option step (Consultoría) */}
+			{/* Two-option step (Consultoría). Con edición fundadora activa muestra el
+			    split: precio regular tachado + precio fundador anclado. Retiro = quitar
+			    founderPrice en lib/oferta.ts (revierte aquí sin tocar este componente). */}
 			{step.options ? (
 				<div className="flex flex-col gap-5">
 					{step.options.map((option) => (
@@ -84,13 +86,31 @@ function StepCard({ step, index }: { step: Step; index: number }) {
 								<span className="text-body font-semibold text-[var(--color-fg)]">
 									{option.label}
 								</span>
-								<span className="text-body-lg font-semibold text-brand-gradient">
-									{option.price}
-								</span>
+								{option.founderPrice ? (
+									<span className="flex items-baseline gap-2">
+										<span className="sr-only">Precio regular: </span>
+										<del className="text-body text-[var(--color-fg-muted)] decoration-[var(--color-fg-muted)]/50">
+											{option.price}
+										</del>
+										<span className="sr-only">Precio fundador: </span>
+										<span className="text-body-lg font-semibold text-brand-gradient">
+											{option.founderPrice}
+										</span>
+									</span>
+								) : (
+									<span className="text-body-lg font-semibold text-brand-gradient">
+										{option.price}
+									</span>
+								)}
 							</div>
 							<p className="text-body text-[var(--color-fg-muted)] [text-wrap:pretty] leading-relaxed">
 								{option.detail}
 							</p>
+							{option.founderNote ? (
+								<span className="text-meta uppercase tracking-[0.16em] text-[var(--color-crimson)]">
+									{option.founderNote}
+								</span>
+							) : null}
 						</div>
 					))}
 				</div>

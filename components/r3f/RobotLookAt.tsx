@@ -35,7 +35,10 @@ const HEAD_LERP = 0.09;
 
 // El modelo PBR usa EXT_meshopt_compression — drei v10 trae el decoder built-in
 // cuando se pasa `true` como tercer arg.
-useGLTF.preload(MODEL_URL, undefined, true);
+//
+// NO usamos `useGLTF.preload` (eager): descargaba los 5.4 MB del GLB durante la
+// evaluación del módulo, compitiendo con el LCP. Ahora el modelo se carga cuando
+// el Canvas monta (diferido a idle en desktop; en móvil no se monta).
 
 export interface MouseFollowRef {
 	targetX: number;
@@ -59,21 +62,25 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 	const tmpQuat = useRef(new THREE.Quaternion());
 
 	useEffect(() => {
-		// Wrapper objeto para evitar el narrowing de TS5 sobre `let` mutado
-		// dentro del closure de `traverse` (que infiere `never` al salir).
+		// three.js GLTFLoader SANITIZA los nombres de nodos al cargar (elimina los
+		// caracteres reservados `:` `.` `/` `[` `]`), así que el `tripo::Head_0`
+		// del contenedor GLB llega como `tripoHead_0` en runtime. Buscamos por
+		// nombre NORMALIZADO para tolerar la sanitización sin acoplarnos a la forma
+		// exacta del nombre cargado.
+		const norm = (s: string) => s.replace(/[^a-z0-9]/gi, "").toLowerCase();
+		const target = norm(HEAD_BONE_NAME);
 		const result: { node: THREE.Object3D | null } = { node: null };
 		scene.traverse((obj) => {
-			if (obj.name === HEAD_BONE_NAME) result.node = obj;
+			if (norm(obj.name) === target) result.node = obj;
 		});
 		headRef.current = result.node;
 		if (result.node) {
 			baseQuatRef.current = result.node.quaternion.clone();
 		} else if (process.env.NODE_ENV !== "production") {
+			const names: string[] = [];
+			scene.traverse((o) => o.name && names.push(o.name));
 			// eslint-disable-next-line no-console
-			console.warn(
-				`[RobotLookAt] Head bone "${HEAD_BONE_NAME}" no encontrado en el GLB. ` +
-					`LookAt deshabilitado. Bones disponibles en runtime: usa scene.traverse para inspeccionar.`,
-			);
+			console.warn(`[RobotLookAt] Head bone no encontrado. Bones en runtime: ${names.join(", ")}`);
 		}
 	}, [scene]);
 

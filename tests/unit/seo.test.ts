@@ -145,7 +145,7 @@ describe("seo — consultoriaServiceJsonLd", () => {
 		}
 	});
 
-	// TD-3 reabierta (decisión de empresa 2026-06-03, opción B): /consultoria
+	// TD-3 reabierta (decisión de empresa 2026-06-03, opción B): /consultoria-legal
 	// muestra el split fundador en la UI; su structured data lo declara igual.
 	it("expone el precio fundador de la edición fundadora", () => {
 		const json = JSON.stringify(consultoriaServiceJsonLd());

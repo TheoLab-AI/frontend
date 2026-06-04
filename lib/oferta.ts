@@ -22,10 +22,13 @@ export interface Step {
 }
 
 /**
- * Fuente única del embudo. La consumen OfferLadder (/consultoria + home) y
+ * Fuente única del embudo. La consumen OfferLadder (/consultoria-legal + home) y
  * ofertaJsonLd. La edición fundadora ofrece descuento a los primeros 10
  * clientes; mientras `founderPrice` esté presente, el embudo muestra split
- * regular vs fundador y el JSON-LD emite ambos Offers.
+ * regular vs fundador y el JSON-LD emite ambos Offers. RETIRO MANUAL de la
+ * edición fundadora = quitar `founderPrice`/`founderNote` de las opciones de
+ * abajo: revierte todo (home + /consultoria-legal + JSON-LD) vía el helper
+ * compartido, sin tocar componentes ni tests de estructura.
  */
 export const STEPS: readonly Step[] = [
 	{
@@ -70,3 +73,11 @@ export const FOUNDER_FRAME =
 	"Los primeros diez clientes acceden a precio fundador. No es promoción: es el precio de ser primeros, y de ayudarnos a calibrar el método sobre casos reales.";
 
 export const FOUNDER_SPOTS_TOTAL = 10;
+
+/**
+ * Cupos de la edición fundadora aún disponibles. PERILLA MANUAL: se baja a mano
+ * a medida que entran clientes (no hay conteo automático todavía). Es la fuente
+ * única del contador "n/10" que muestra el header de /consultoria-legal.
+ * Cuando se fidelicen los 10 → retirar la edición fundadora (ver STEPS arriba).
+ */
+export const FOUNDER_SPOTS_LEFT = 3;

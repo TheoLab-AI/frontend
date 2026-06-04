@@ -36,7 +36,7 @@ test.describe("TheoLab home — smoke", () => {
 		await page.goto("/");
 		const bridge = page.getByRole("link", { name: /firma legal/i });
 		await expect(bridge.first()).toBeVisible();
-		await expect(bridge.first()).toHaveAttribute("href", "/consultoria");
+		await expect(bridge.first()).toHaveAttribute("href", "/consultoria-legal");
 	});
 
 	test("muestra los planes con precios públicos", async ({ page }) => {

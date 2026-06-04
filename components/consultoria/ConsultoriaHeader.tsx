@@ -9,12 +9,12 @@ import { Wordmark } from "@/components/ui/Wordmark";
 /* =========================================================================
  * ConsultoriaHeader
  *
- * Specialized variant of the global Navbar for /consultoria. Uses the same
+ * Specialized variant of the global Navbar for /consultoria-legal. Uses the same
  * composable primitive (Navbar.Root + Brand/Items/Status/CTA/Mobile) but
  * carries the page-specific Status slot — a live availability widget that
  * renders dynamic remaining slots ("CUPOS JUNIO {n}/10 DISPONIBLES").
  *
- * Anchors target the F02..F08 sections rendered by app/consultoria/page.tsx.
+ * Anchors target the F02..F08 sections rendered by app/consultoria-legal/page.tsx.
  * Mobile collapses the menu via Radix Dialog (handled by Navbar.Mobile);
  * the CUPOS widget is intentionally desktop-only (>= lg) to preserve hierarchy.
  * ========================================================================= */
@@ -35,7 +35,9 @@ const anchors = items.map((i) => i.href);
 
 const Brand = (): ReactElement => (
 	<Link href="/" aria-label="Volver al inicio de TheoLab">
-		<Wordmark size="sm" />
+		{/* Header onyx → wordmark en alabaster (si no, "Theo" queda oscuro sobre
+		    oscuro y solo se ve "Lab"). Mismo patrón que ConsultoriaFooter. */}
+		<Wordmark size="sm" className="text-[var(--color-alabaster)]" />
 	</Link>
 );
 

@@ -1,10 +1,18 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import {
+	type MutableRefObject,
+	type ReactElement,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { fadeUp, stagger } from "@/components/motion/variants";
 import type { MouseFollowRef } from "@/components/r3f/RobotLookAt";
-import { HeroR3FScene } from "@/components/sections/HeroR3FScene";
 import { Card } from "@/components/ui/Card";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { TextShimmer } from "@/components/ui/TextShimmer";
@@ -12,7 +20,7 @@ import { TextShimmer } from "@/components/ui/TextShimmer";
 /* =========================================================================
  * HeroR3F — Hero de producción · Fase 3 R3F
  *
- * Reemplaza HeroSplite.tsx en /consultoria. Mantiene la ARQUITECTURA VISUAL
+ * Reemplaza HeroSplite.tsx en /consultoria-legal. Mantiene la ARQUITECTURA VISUAL
  * (Card variant=dark, Spotlight gold upper-left, HeroVeil de legibilidad,
  * layout split 50/50 en lg, pills + banner reactivo), pero cambia:
  *
@@ -205,15 +213,59 @@ function HeroVeil(): ReactElement {
 	);
 }
 
-function R3FFallback(): ReactElement {
+// HeroR3FScene (three.js + drei + GLB 5.4 MB) se carga SOLO cuando se monta el
+// Canvas — dynamic import separado para que NO entre en el chunk inicial del
+// hero ni se descargue en móvil (donde nunca se monta el Canvas).
+const HeroR3FScene = dynamic(
+	() => import("@/components/sections/HeroR3FScene").then((m) => m.HeroR3FScene),
+	{ ssr: false },
+);
+
+/* Poster estático del robot (WebP ~2.4 KB) — el LCP element. En móvil es la
+   ÚNICA representación (cero three.js); en desktop hace de placeholder inmediato
+   debajo del Canvas mientras el GLB se descarga. */
+function RobotPoster(): ReactElement {
 	return (
-		<div
-			className="flex h-full w-full items-center justify-center bg-[var(--color-onyx)]"
+		// biome-ignore lint/performance/noImgElement: poster decorativo above-the-fold; next/image añadiría overhead sin beneficio aquí
+		<img
+			src="/hero-robot-poster.webp"
+			alt=""
 			aria-hidden="true"
-		>
-			<span className="text-mono text-[0.65rem] text-[var(--color-fg-muted)] tracking-[0.18em] uppercase">
-				Cargando escena…
-			</span>
+			draggable={false}
+			className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain object-top"
+		/>
+	);
+}
+
+/* Desktop: poster inmediato + Canvas R3F diferido a `requestIdleCallback`
+   (post-LCP). Combinado con quitar el preload eager del GLB (ver RobotLookAt),
+   el modelo se descarga cuando el Canvas monta —no durante la evaluación del
+   módulo— así no compite con el render inicial. */
+function RobotCanvas({
+	mouseRef,
+	lookAtEnabled,
+}: {
+	mouseRef: MutableRefObject<MouseFollowRef>;
+	lookAtEnabled: boolean;
+}): ReactElement {
+	const [load3D, setLoad3D] = useState(false);
+	useEffect(() => {
+		const w = window;
+		if (w.requestIdleCallback) {
+			const id = w.requestIdleCallback(() => setLoad3D(true), { timeout: 1800 });
+			return () => w.cancelIdleCallback(id);
+		}
+		const id = w.setTimeout(() => setLoad3D(true), 900);
+		return () => w.clearTimeout(id);
+	}, []);
+	return (
+		<div className="relative h-full w-full">
+			<RobotPoster />
+			{load3D ? (
+				<div className="absolute inset-0">
+					<HeroR3FScene mouseRef={mouseRef} lookAtEnabled={lookAtEnabled} />
+				</div>
+			) : null}
 		</div>
 	);
 }
@@ -297,9 +349,9 @@ export function HeroR3F(): ReactElement {
 				<div className="absolute inset-0 z-0 hidden lg:block" aria-hidden="false">
 					<div className="absolute top-[clamp(56px,8vh,96px)] bottom-0 right-0 w-full lg:w-[64%] xl:w-[60%]">
 						{isLgUp === true ? (
-							<HeroR3FScene mouseRef={mouseRef} lookAtEnabled={!prefersReducedMotion} />
+							<RobotCanvas mouseRef={mouseRef} lookAtEnabled={!prefersReducedMotion} />
 						) : (
-							<R3FFallback />
+							<RobotPoster />
 						)}
 					</div>
 				</div>
@@ -408,11 +460,7 @@ export function HeroR3F(): ReactElement {
 
 					{/* Mobile / <lg R3F column — stacked under copy */}
 					<div className="relative aspect-square w-full overflow-hidden border border-[var(--color-divider)]/40 bg-[var(--color-onyx)] lg:hidden">
-						{isLgUp === false ? (
-							<HeroR3FScene mouseRef={mouseRef} lookAtEnabled={!prefersReducedMotion} />
-						) : (
-							<R3FFallback />
-						)}
+						<RobotPoster />
 					</div>
 
 					{/* Right column placeholder — keeps grid balance on lg; actual scene
