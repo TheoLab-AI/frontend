@@ -114,7 +114,7 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 			gl={{
 				antialias: true,
 				toneMapping: THREE.ACESFilmicToneMapping,
-				toneMappingExposure: 1.15,
+				toneMappingExposure: 1.0,
 				outputColorSpace: THREE.SRGBColorSpace,
 				powerPreference: "high-performance",
 				alpha: true,
@@ -123,22 +123,30 @@ export function HeroR3FScene({ mouseRef, lookAtEnabled = true }: HeroR3FScenePro
 			shadows
 			style={{ background: "transparent" }}
 		>
-			{/* 3-point lighting calibrado para fondo onyx + composición editorial.
-			    Key cálido upper-right contrasta con el Spotlight gold (upper-left
-			    de la Card) — evita que las luces compitan por el mismo lado.
-			    Fill frío inferior-izq define contorno; rim cálido trasero da
-			    halo dorado coherente con var(--color-gold). */}
-			<ambientLight intensity={0.35} />
+			{/* 3-point lighting reducido para evitar reflejo excesivo del traje:
+			    el material PBR del traje cyborg tiene metalness alta + roughness
+			    baja, lo que genera highlights muy brillantes al recibir luz
+			    direccional fuerte. Bajamos intensities y movemos la key light
+			    más lateral (hacia 3/4 trasero) para que el rebote no incida
+			    frontalmente sobre el saco.
+
+			    Key: cálida desde upper-right pero MÁS DETRÁS (Z=2 vs 3.5).
+			    Intensity 1.1 vs 1.65 anterior — suficiente para esculpir
+			    sin quemar.
+			    Fill: fría desde izquierda (sin cambio). Define el contorno.
+			    Rim: cálido trasero más sutil (0.7 vs 1.1) — halo dorado
+			    sin saturación. */}
+			<ambientLight intensity={0.4} />
 			<directionalLight
-				position={[4, 5.5, 3.5]}
-				intensity={1.65}
+				position={[3.5, 5.5, 2]}
+				intensity={1.1}
 				color="#fff4dc"
 				castShadow
 				shadow-mapSize={[2048, 2048]}
 				shadow-bias={-0.0001}
 			/>
-			<directionalLight position={[-3.5, 1.2, 2.5]} intensity={0.5} color="#a0c4ff" />
-			<directionalLight position={[0, -0.2, -5]} intensity={1.1} color="#f6c060" />
+			<directionalLight position={[-3.5, 1.2, 2.5]} intensity={0.45} color="#a0c4ff" />
+			<directionalLight position={[0, -0.2, -5]} intensity={0.7} color="#f6c060" />
 
 			<Suspense fallback={null}>
 				{/* CameraIntro DENTRO del Suspense para que la animación de entrada

@@ -47,7 +47,13 @@ import * as THREE from "three";
 // a 320K vertices + meshopt + WebP q88). Mismo rig, misma animation,
 // nueva URL fuerza re-fetch en browsers que cacheaban el archivo viejo.
 const MODEL_URL = "/models/robot-mixamo-v2.glb";
-const HEAD_BONE_NAME = "mixamorig:Head";
+// Importante: el GLB raw tiene los bones con naming "mixamorig:Head" (con
+// dos puntos), pero el GLTFLoader de three.js / drei NORMALIZA los nombres
+// durante el load — sanitiza el `:` removiéndolo. En runtime el bone está
+// disponible como "mixamorigHead" (sin separador). Si buscamos "mixamorig:
+// Head" no lo encontramos y headRef queda null → useFrame retorna early →
+// LookAt no se aplica. Confirmado vía console.log de allBones en preview.
+const HEAD_BONE_NAME = "mixamorigHead";
 const ANIMATION_NAME = "mixamo.com";
 
 // Amplitudes deliberadamente AMPLIAS para que el LookAt sea claramente
@@ -82,36 +88,32 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 	const tmpEuler = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
 	const tmpQuat = useRef(new THREE.Quaternion());
 
-	// Counter para throttling de logs de debug (no spammear consola).
-	const debugFrameCountRef = useRef(0);
-
 	// 1. Resolver el head bone una sola vez al montar.
 	useEffect(() => {
 		const result: { node: THREE.Object3D | null } = { node: null };
-		const allBones: string[] = [];
 		scene.traverse((obj) => {
-			if (obj.name) allBones.push(obj.name);
 			if (obj.name === HEAD_BONE_NAME) result.node = obj;
 		});
 		headRef.current = result.node;
-		// eslint-disable-next-line no-console
-		console.log(
-			`[RobotLookAt] Mount. Head bone "${HEAD_BONE_NAME}": ${result.node ? "FOUND" : "NOT FOUND"}. Total bones in scene: ${allBones.length}.`,
-		);
-		if (!result.node) {
+		if (!result.node && process.env.NODE_ENV !== "production") {
 			// eslint-disable-next-line no-console
-			console.warn(`[RobotLookAt] Bones available (first 20):`, allBones.slice(0, 20).join(", "));
+			console.warn(
+				`[RobotLookAt] Head bone "${HEAD_BONE_NAME}" no encontrado. LookAt deshabilitado.`,
+			);
 		}
 	}, [scene]);
 
 	// 2. Reproducir el clip Mixamo en loop al montar.
 	useEffect(() => {
 		const action = actions[ANIMATION_NAME];
-		// eslint-disable-next-line no-console
-		console.log(`[RobotLookAt] Animations available:`, Object.keys(actions).join(", ") || "(none)");
 		if (!action) {
-			// eslint-disable-next-line no-console
-			console.warn(`[RobotLookAt] Animation clip "${ANIMATION_NAME}" no encontrado.`);
+			if (process.env.NODE_ENV !== "production") {
+				// eslint-disable-next-line no-console
+				console.warn(
+					`[RobotLookAt] Animation clip "${ANIMATION_NAME}" no encontrado. ` +
+						`Clips disponibles: ${Object.keys(actions).join(", ") || "(ninguno)"}`,
+				);
+			}
 			return;
 		}
 		action.reset().fadeIn(0.4).play();
@@ -151,18 +153,6 @@ export function RobotLookAt({ mouseRef, enabled = true }: RobotLookAtProps): Rea
 		// head.quaternion ya contiene la rotación de la animación en este frame.
 		// Multiplicamos para sumar el delta del LookAt SIN sobrescribir la animation.
 		head.quaternion.multiply(tmpQuat.current);
-
-		// Debug log throttled a 1 vez cada 2 segundos (~120 frames a 60 fps).
-		// Quitar despues de validar que LookAt funciona en preview.
-		debugFrameCountRef.current = (debugFrameCountRef.current + 1) % 120;
-		if (debugFrameCountRef.current === 0) {
-			// eslint-disable-next-line no-console
-			console.log(
-				`[RobotLookAt] frame: mouse target=(${m.targetX.toFixed(2)}, ${m.targetY.toFixed(2)}) ` +
-					`smooth=(${m.x.toFixed(2)}, ${m.y.toFixed(2)}) ` +
-					`applied yaw=${yaw.toFixed(2)} pitch=${pitch.toFixed(2)}`,
-			);
-		}
 	});
 
 	return <primitive object={scene} />;
