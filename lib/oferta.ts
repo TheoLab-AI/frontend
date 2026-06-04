@@ -101,15 +101,19 @@ const PLAN_ID_BY_LABEL: Record<string, ConsultoriaPlanId> = {
 
 /** Deriva los tiers de Consultoría desde STEPS (fuente única). */
 export function getConsultoriaPlans(): ResolvedPlan[] {
-	const options = STEPS[CONSULTORIA_STEP_INDEX].options ?? [];
-	return options.map((o) => ({
-		id: PLAN_ID_BY_LABEL[o.label],
-		label: o.label,
-		detail: o.detail,
-		precioRegular: o.price,
-		precioFundador: o.founderPrice,
-		founderNote: o.founderNote,
-	}));
+	const options = STEPS[CONSULTORIA_STEP_INDEX]?.options ?? [];
+	return options.map((o) => {
+		const id = PLAN_ID_BY_LABEL[o.label];
+		if (!id) throw new Error(`Plan de consultoría sin id para label: ${o.label}`);
+		return {
+			id,
+			label: o.label,
+			detail: o.detail,
+			precioRegular: o.price,
+			precioFundador: o.founderPrice,
+			founderNote: o.founderNote,
+		};
+	});
 }
 
 export function getConsultoriaPlan(id: ConsultoriaPlanId): ResolvedPlan | undefined {

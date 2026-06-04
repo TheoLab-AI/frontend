@@ -5,8 +5,8 @@ describe("getConsultoriaPlans", () => {
 	it("deriva los dos tiers desde STEPS con sus ids", () => {
 		const plans = getConsultoriaPlans();
 		expect(plans.map((p) => p.id)).toEqual(["inicial", "completa"]);
-		expect(plans[0].precioRegular).toBe("$500.000");
-		expect(plans[0].precioFundador).toBe("$200.000");
+		expect(plans[0]?.precioRegular).toBe("$500.000");
+		expect(plans[0]?.precioFundador).toBe("$200.000");
 	});
 });
 
