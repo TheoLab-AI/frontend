@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isCheckoutEnabled } from "@/lib/flags";
 import { getConsultoriaPlan, getEffectivePrice, isConsultoriaPlanId } from "@/lib/oferta";
 import { CheckoutForm } from "./CheckoutForm";
 
@@ -7,6 +8,10 @@ export default async function CheckoutPage({
 }: {
 	searchParams: Promise<{ plan?: string; fuente?: string }>;
 }) {
+	// Flag off → el feature está "dark" (sin env de backend configuradas): no
+	// servir un flujo roto ni siquiera por URL directa.
+	if (!isCheckoutEnabled()) redirect("/consultoria-legal");
+
 	const { plan: planParam, fuente } = await searchParams;
 	if (!isConsultoriaPlanId(planParam)) redirect("/consultoria-legal");
 

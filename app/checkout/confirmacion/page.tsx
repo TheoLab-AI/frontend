@@ -1,8 +1,13 @@
+import { redirect } from "next/navigation";
 import { getBankDetails } from "@/lib/bank";
+import { isCheckoutEnabled } from "@/lib/flags";
 
 export const dynamic = "force-dynamic";
 
 export default function ConfirmacionPage() {
+	// Flag off → feature "dark": no exponer datos bancarios ni 500 por env faltante.
+	if (!isCheckoutEnabled()) redirect("/consultoria-legal");
+
 	const bank = getBankDetails();
 	const filas: [string, string][] = [
 		["Banco", bank.banco],
