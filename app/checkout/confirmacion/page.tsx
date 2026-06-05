@@ -1,5 +1,7 @@
 import { getBankDetails } from "@/lib/bank";
 
+export const dynamic = "force-dynamic";
+
 export default function ConfirmacionPage() {
 	const bank = getBankDetails();
 	const filas: [string, string][] = [
