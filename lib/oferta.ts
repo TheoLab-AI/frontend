@@ -81,3 +81,60 @@ export const FOUNDER_SPOTS_TOTAL = 10;
  * Cuando se fidelicen los 10 → retirar la edición fundadora (ver STEPS arriba).
  */
 export const FOUNDER_SPOTS_LEFT = 3;
+
+export type ConsultoriaPlanId = "inicial" | "completa";
+
+export interface ResolvedPlan {
+	id: ConsultoriaPlanId;
+	label: string;
+	detail: string;
+	precioRegular: string;
+	precioFundador?: string;
+	founderNote?: string;
+}
+
+const CONSULTORIA_STEP_INDEX = 1;
+const PLAN_ID_BY_LABEL: Record<string, ConsultoriaPlanId> = {
+	Inicial: "inicial",
+	Completa: "completa",
+};
+
+/** Deriva los tiers de Consultoría desde STEPS (fuente única). */
+export function getConsultoriaPlans(): ResolvedPlan[] {
+	const options = STEPS[CONSULTORIA_STEP_INDEX]?.options ?? [];
+	return options.map((o) => {
+		const id = PLAN_ID_BY_LABEL[o.label];
+		if (!id) throw new Error(`Plan de consultoría sin id para label: ${o.label}`);
+		return {
+			id,
+			label: o.label,
+			detail: o.detail,
+			precioRegular: o.price,
+			precioFundador: o.founderPrice,
+			founderNote: o.founderNote,
+		};
+	});
+}
+
+export function getConsultoriaPlan(id: ConsultoriaPlanId): ResolvedPlan | undefined {
+	return getConsultoriaPlans().find((p) => p.id === id);
+}
+
+/** Type guard único para el id de plan (lo reusa lib/checkout y la página). */
+export function isConsultoriaPlanId(value: string | undefined): value is ConsultoriaPlanId {
+	return value === "inicial" || value === "completa";
+}
+
+export interface EffectivePrice {
+	precio: string;
+	edicion: "fundador" | "regular";
+	note?: string;
+}
+
+/** Precio fundador si quedan cupos y el plan lo ofrece; si no, regular. */
+export function getEffectivePrice(plan: ResolvedPlan): EffectivePrice {
+	if (FOUNDER_SPOTS_LEFT > 0 && plan.precioFundador) {
+		return { precio: plan.precioFundador, edicion: "fundador", note: plan.founderNote };
+	}
+	return { precio: plan.precioRegular, edicion: "regular" };
+}

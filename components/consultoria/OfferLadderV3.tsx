@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "motion/react";
+import Link from "next/link";
 import { type ReactElement, useId } from "react";
 import { fadeUp, stagger } from "@/components/motion/variants";
+import { isCheckoutEnabled } from "@/lib/flags";
 import {
 	FOUNDER_FRAME,
 	FOUNDER_SPOTS_TOTAL,
@@ -36,6 +38,11 @@ const SECTION_COPY = {
 	headline: "Tres peldaños. Cada uno responde una pregunta distinta.",
 	sub: "TheoLab no vende una herramienta de IA. Vende criterio sobre dónde aplicarla — y la mano que la implementa cuando la decisión ya está tomada, sobre los números de su firma.",
 } as const;
+
+const PLAN_ID_BY_LABEL: Record<string, "inicial" | "completa"> = {
+	Inicial: "inicial",
+	Completa: "completa",
+};
 
 export function OfferLadderV3(): ReactElement {
 	return (
@@ -227,6 +234,15 @@ function TierBlock({ option }: { option: StepOption }): ReactElement {
 					<DisplayPrice price={option.price} srLabel="Precio" />
 				)}
 			</div>
+			{isCheckoutEnabled() ? (
+				<Link
+					href={`/checkout?plan=${PLAN_ID_BY_LABEL[option.label]}&fuente=consultoria-legal`}
+					className="mt-2 inline-flex w-fit items-center gap-2 text-meta uppercase tracking-[0.18em] text-[var(--color-alabaster)]/70 transition-colors hover:text-[var(--color-gold)]"
+				>
+					Contratar
+					<span aria-hidden="true">→</span>
+				</Link>
+			) : null}
 		</article>
 	);
 }
