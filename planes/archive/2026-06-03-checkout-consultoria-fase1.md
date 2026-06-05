@@ -10,7 +10,7 @@
 
 **Tech Stack:** Next 16 (App Router, Server Actions, React 19 `useActionState`), TypeScript, vitest + @testing-library/react, Biome (tabs).
 
-**Specs:** [`../specs/2026-06-03-checkout-consultoria-design.md`](../specs/2026-06-03-checkout-consultoria-design.md) · [`../specs/2026-06-03-mailerlite-growth-architecture.md`](../specs/2026-06-03-mailerlite-growth-architecture.md)
+**Specs:** [`docs/superpowers/specs/2026-06-03-checkout-consultoria-design.md`](../../docs/superpowers/specs/2026-06-03-checkout-consultoria-design.md) · [`docs/superpowers/specs/2026-06-03-mailerlite-growth-architecture.md`](../../docs/superpowers/specs/2026-06-03-mailerlite-growth-architecture.md)
 
 **Convenciones del repo:**
 - Comandos: `pnpm test` (vitest), `pnpm typecheck` (tsc), `pnpm check` (Biome lint+format).

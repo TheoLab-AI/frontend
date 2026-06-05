@@ -1,5 +1,7 @@
 # Home institucional enriquecida — Plan de implementación
 
+> **Estado:** ✅ IMPLEMENTADO — integrado en `main` (2026-06-03). `lib/oferta.ts` (fuente única + helpers de checkout añadidos en PR #5), `lib/contact.ts`, `components/institucional/PropiedadCliente.tsx`, `components/institucional/HomeCTA.tsx`, `OfferLadder` en home, `ofertaJsonLd()` en `lib/seo.ts`. Todos los tests verdes. Los checkboxes `- [ ]` reflejan el plan original; la implementación está completa en `main`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Enriquecer la home (`/`) a carta de presentación completa con los planes y precios visibles, sin romper el aislamiento de audiencias ni la coherencia de precios con `/consultoria`.
@@ -8,7 +10,7 @@
 
 **Tech Stack:** Next.js 16 (App Router) · Tailwind v4 · Radix · Motion · Biome · pnpm. Tests: Vitest (`tests/unit`) + Playwright (`tests/e2e`).
 
-**Spec fuente:** [`docs/superpowers/specs/2026-06-01-home-institucional-enriquecida-design.md`](../specs/2026-06-01-home-institucional-enriquecida-design.md).
+**Spec fuente:** [`docs/superpowers/specs/2026-06-01-home-institucional-enriquecida-design.md`](../../docs/superpowers/specs/2026-06-01-home-institucional-enriquecida-design.md).
 
 ---
 

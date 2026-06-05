@@ -1,5 +1,7 @@
 # Front de dos niveles (D-3) — Plan de implementación
 
+> **Estado:** ✅ OBJETIVO CUMPLIDO — implementado con arquitectura diferente. La web de dos niveles existe en producción: `/` institucional + `/consultoria-legal` conversión. La implementación real usa HeroR3F, OfferLadderV3, Espejo, Diferenciadores, ParaQuien, CTAFinal, FAQ (no los componentes originales de este plan). Ruta final: `/consultoria-legal` (no `/consultoria`). Integrado vía PR #2 `feat/consultoria-redesign-v3` + PR #3 `feat/hero-r3f-migration` (Juan José Gómez, 2026-06-03). Los checkboxes `- [ ]` reflejan el plan original, no la implementación final.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Reestructurar el front de una landing de página única a una web de dos niveles: home institucional (`/`) + landing legal-first de conversión (`/consultoria`).
@@ -8,7 +10,7 @@
 
 **Tech Stack:** Next.js 16 (App Router) · Tailwind v4 · Radix · Motion · Biome · pnpm. Tests: Vitest (`tests/unit`) + Playwright (`tests/e2e`).
 
-**Spec fuente:** [`docs/superpowers/specs/2026-06-01-front-dos-niveles-design.md`](../specs/2026-06-01-front-dos-niveles-design.md).
+**Spec fuente:** [`docs/superpowers/specs/2026-06-01-front-dos-niveles-design.md`](../../docs/superpowers/specs/2026-06-01-front-dos-niveles-design.md).
 
 ---
 
