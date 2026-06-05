@@ -1,5 +1,7 @@
 # Checkout Consultoría (Fase 1) Implementation Plan
 
+> **Estado:** ✅ completado e integrado en `main` (PR #5, 2026-06-04). Todas las tareas implementadas con gates verdes (typecheck · biome · vitest 76/76 · e2e). Los checkboxes `- [ ]` de abajo son el plan original; no se re-marcan uno a uno. **Adaptación de integración:** se añadió el flag `NEXT_PUBLIC_CHECKOUT_ENABLED` (`lib/flags.ts`) para dejar el feature "dark" en prod hasta configurar las env — ver `DESIGN-DECISIONS.md` → ADR-F3.
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implementar la ruta `/checkout` self-service post-reunión que captura el lead en MailerLite (con custom fields del journey) y muestra instrucciones de transferencia bancaria.

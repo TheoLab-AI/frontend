@@ -94,6 +94,18 @@ pnpm test:e2e             # Playwright E2E + screenshots
 pnpm test:e2e:ui          # Playwright UI mode
 ```
 
+## Variables de entorno
+
+Plantilla en `.env.example` (sin valores reales). Hoy solo el embudo de checkout (Fase 1) las usa:
+
+| Variable | Propósito |
+|---|---|
+| `NEXT_PUBLIC_CHECKOUT_ENABLED` | Flag del checkout. **Off por defecto** → `/checkout` queda oculto (botón "Contratar" + rutas redirigen). Poner `1` solo cuando el resto esté configurado. |
+| `EMAIL_PROVIDER` + `MAILERLITE_*` + `NOTIFICATION_EMAIL` | Captura de leads en MailerLite (puerto `EmailService`). |
+| `BANK_*` | Datos de transferencia bancaria (server-side, nunca `NEXT_PUBLIC`). |
+
+Detalle de arquitectura y activación: `DESIGN-DECISIONS.md` → **ADR-F3**.
+
 ## Performance targets v0.0.1
 
 Gates no negociables (Lighthouse mobile):

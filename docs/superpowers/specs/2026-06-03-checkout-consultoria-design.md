@@ -1,8 +1,10 @@
 # Checkout Consultoría (post-reunión) + MailerLite — Diseño
 
-> **Estado:** aprobado pendiente de revisión · **Fecha:** 2026-06-03 · **Rama:** `feat/checkout-consultoria` (desde `main`)
+> **Estado:** ✅ implementado e integrado en `main` (PR #5, 2026-06-04) · **Fecha:** 2026-06-03 · **Rama:** `feat/checkout-consultoria` (desde `main`)
 > **Tipo:** feature de frontend (nueva ruta + integración de email)
 > **Hogar:** `frontend/docs/superpowers/specs/`
+>
+> **Nota de integración (2026-06-04):** se añadió el flag `NEXT_PUBLIC_CHECKOUT_ENABLED` (`lib/flags.ts`, off por defecto) no contemplado en este spec: el feature queda "dark" en prod (botón oculto + rutas redirigen) hasta configurar las env de backend. Ver `DESIGN-DECISIONS.md` → ADR-F3. El canal secundario (botón "Contratar" en `OfferLadderV3`, §2) solo aparece con el flag activo.
 
 ## 1. Objetivo y boundary de scope
 
