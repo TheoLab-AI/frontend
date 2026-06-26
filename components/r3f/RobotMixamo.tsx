@@ -51,8 +51,11 @@ const HEAD_MAX_PITCH = 0.22;
 const HEAD_LERP = 0.09;
 
 // El GLB usa EXT_meshopt_compression + EXT_texture_webp — drei v10 trae los
-// decoders built-in cuando se pasa `true` como tercer arg. NO preload eager:
-// el modelo descarga cuando el Canvas monta (diferido a idle por el padre).
+// decoders built-in cuando se pasa `true` como tercer arg. Preload al
+// evaluar el modulo: como este modulo solo se importa via dynamic({ssr:false})
+// desde RobotScene, el preload se dispara JUSTO al entrar al chunk del Canvas
+// (no en bundle inicial). Asi el fetch del GLB arranca lo antes posible.
+useGLTF.preload(MODEL_URL, undefined, true);
 
 export interface MouseFollowRef {
 	targetX: number;

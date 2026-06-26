@@ -31,11 +31,22 @@ const RobotScene = dynamic(
 	() => import("@/components/protolab/RobotScene").then((m) => m.RobotScene),
 	{
 		ssr: false,
+		// Fallback minimal y sobrio mientras descarga el chunk R3F + GLB.
+		// El BeamsBackground + BackgroundAura + ProtolabAmbience ya estan visibles
+		// (viven fuera del dynamic), asi que el usuario ve el fondo cinematico
+		// completo desde el primer frame. Solo este punto dorado pulsante ocupa
+		// el espacio donde llegara el robot, sin pantalla vacia ni texto pesado.
 		loading: () => (
-			<div className="flex h-full w-full items-center justify-center bg-[var(--color-onyx)]">
-				<p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-alabaster)]/55">
-					Cargando experiencia 3D
-				</p>
+			<div className="flex h-full w-full items-center justify-center">
+				<div className="flex flex-col items-center gap-3">
+					<div
+						className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-gold)]"
+						style={{ boxShadow: "0 0 18px var(--color-gold)" }}
+					/>
+					<p className="text-mono text-[0.625rem] uppercase tracking-[0.22em] text-[var(--color-alabaster)]/40">
+						Iniciando
+					</p>
+				</div>
 			</div>
 		),
 	},

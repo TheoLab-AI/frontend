@@ -9,5 +9,18 @@ export const metadata: Metadata = {
 };
 
 export default function ProtolabLayout({ children }: { children: React.ReactNode }) {
-	return <>{children}</>;
+	return (
+		<>
+			{/* Preconnect a la API de Gemini Live: adelanta el handshake TCP/TLS
+			    para que cuando VoiceClient haga su primer fetch del token + WebSocket
+			    la conexion ya este caliente. Reduce ~200-500ms en el primer turno. */}
+			<link
+				rel="preconnect"
+				href="https://generativelanguage.googleapis.com"
+				crossOrigin="anonymous"
+			/>
+			<link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+			{children}
+		</>
+	);
 }

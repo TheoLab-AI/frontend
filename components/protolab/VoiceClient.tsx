@@ -3,7 +3,10 @@
  *
  * This component renders nothing visible. Its sole responsibility is to:
  *   1. Create a VoiceClientInstance on mount (createVoiceClient())
- *   2. Call connect() to open the WebSocket session (token fetch + Live handshake)
+ *   2. Connect to Gemini LAZILY on the first start() call (NOT on mount).
+ *      This keeps the initial page load fast — no token fetch + WS handshake
+ *      until the user actually wants to talk. Cold path adds ~1-2s to the
+ *      first mic press, but subsequent presses are instant.
  *   3. Expose start() / stop() / reconnect() to the parent via a forwarded ref
  *   4. Call disconnect() on unmount to release all Audio and WebSocket resources
  *
@@ -68,20 +71,19 @@ export interface VoiceClientHandle {
 export const VoiceClient = forwardRef<VoiceClientHandle>(function VoiceClient(_props, ref) {
 	const clientRef = useRef<VoiceClientInstance | null>(null);
 
-	// Guard against StrictMode double-mount race: track whether connect() was
-	// already initiated so the re-mount after the dev teardown does not fire
-	// a second concurrent connect.
+	// Tracks whether connect() has already opened a session (or is in flight).
+	// Used for the lazy-connect pattern: the FIRST start() triggers connect,
+	// subsequent start() calls skip it. Also serves as the StrictMode guard
+	// against concurrent connects in dev.
 	const connectedRef = useRef(false);
 
 	useEffect(() => {
-		// Create a fresh instance on (re-)mount
+		// Create a fresh instance on (re-)mount. NO connect() here — we defer
+		// the network round-trip (token fetch + WebSocket handshake) until the
+		// user actually presses the mic button. This keeps initial page load
+		// fast and avoids burning Gemini quota for visitors who never speak.
 		const client = createVoiceClient();
 		clientRef.current = client;
-
-		if (!connectedRef.current) {
-			connectedRef.current = true;
-			void client.connect();
-		}
 
 		return () => {
 			// On StrictMode unmount (dev) this runs before the re-mount.
@@ -96,13 +98,29 @@ export const VoiceClient = forwardRef<VoiceClientHandle>(function VoiceClient(_p
 		ref,
 		(): VoiceClientHandle => ({
 			start: async () => {
-				await clientRef.current?.startListening();
+				const client = clientRef.current;
+				if (!client) return;
+				// Lazy connect on first start. Subsequent starts skip this branch.
+				// If connect() fails internally it sets store.error and clears
+				// connectedRef so the next start can retry.
+				if (!connectedRef.current) {
+					connectedRef.current = true;
+					try {
+						await client.connect();
+					} catch (err) {
+						connectedRef.current = false;
+						throw err;
+					}
+				}
+				await client.startListening();
 			},
 			stop: () => {
 				clientRef.current?.stopListening();
 			},
 			reconnect: async () => {
+				connectedRef.current = false;
 				await clientRef.current?.reconnect();
+				connectedRef.current = true;
 			},
 		}),
 		[],
