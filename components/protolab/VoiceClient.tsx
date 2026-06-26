@@ -3,10 +3,14 @@
  *
  * This component renders nothing visible. Its sole responsibility is to:
  *   1. Create a VoiceClientInstance on mount (createVoiceClient())
- *   2. Connect to Gemini LAZILY on the first start() call (NOT on mount).
- *      This keeps the initial page load fast — no token fetch + WS handshake
- *      until the user actually wants to talk. Cold path adds ~1-2s to the
- *      first mic press, but subsequent presses are instant.
+ *   2. Connect to Gemini on mount (eager). NOTE: tried lazy-connect on the
+ *      first start() call to speed up initial page load, but it broke the
+ *      mic — browsers require new AudioContext() to be created INSIDE the
+ *      user gesture handler. Putting `await connect()` before
+ *      startListening() consumes the gesture context, so the subsequent
+ *      AudioContext creation gets rejected. Eager connect on mount keeps
+ *      the gesture path clean (start() only calls startListening, which
+ *      creates the AudioContext inline within the click handler).
  *   3. Expose start() / stop() / reconnect() to the parent via a forwarded ref
  *   4. Call disconnect() on unmount to release all Audio and WebSocket resources
  *
@@ -71,61 +75,45 @@ export interface VoiceClientHandle {
 export const VoiceClient = forwardRef<VoiceClientHandle>(function VoiceClient(_props, ref) {
 	const clientRef = useRef<VoiceClientInstance | null>(null);
 
-	// Tracks whether connect() has already opened a session (or is in flight).
-	// Used for the lazy-connect pattern: the FIRST start() triggers connect,
-	// subsequent start() calls skip it. Also serves as the StrictMode guard
-	// against concurrent connects in dev.
+	// Guard against StrictMode double-mount race in dev: track whether
+	// connect() was already initiated so the re-mount after the dev teardown
+	// does not fire a second concurrent connect.
 	const connectedRef = useRef(false);
 
 	useEffect(() => {
-		// Create a fresh instance on (re-)mount. NO connect() here — we defer
-		// the network round-trip (token fetch + WebSocket handshake) until the
-		// user actually presses the mic button. This keeps initial page load
-		// fast and avoids burning Gemini quota for visitors who never speak.
 		const client = createVoiceClient();
 		clientRef.current = client;
 
+		if (!connectedRef.current) {
+			connectedRef.current = true;
+			void client.connect();
+		}
+
 		return () => {
-			// On StrictMode unmount (dev) this runs before the re-mount.
-			// On real unmount this releases all resources.
 			connectedRef.current = false;
 			client.disconnect();
 			clientRef.current = null;
 		};
-	}, []); // empty deps: run once per mount/unmount cycle
+	}, []);
 
 	useImperativeHandle(
 		ref,
 		(): VoiceClientHandle => ({
 			start: async () => {
-				const client = clientRef.current;
-				if (!client) return;
-				// Lazy connect on first start. Subsequent starts skip this branch.
-				// If connect() fails internally it sets store.error and clears
-				// connectedRef so the next start can retry.
-				if (!connectedRef.current) {
-					connectedRef.current = true;
-					try {
-						await client.connect();
-					} catch (err) {
-						connectedRef.current = false;
-						throw err;
-					}
-				}
-				await client.startListening();
+				// startListening() must run inline within the click handler so
+				// the AudioContext + getUserMedia retain the user gesture
+				// context. No awaits before this.
+				await clientRef.current?.startListening();
 			},
 			stop: () => {
 				clientRef.current?.stopListening();
 			},
 			reconnect: async () => {
-				connectedRef.current = false;
 				await clientRef.current?.reconnect();
-				connectedRef.current = true;
 			},
 		}),
 		[],
 	);
 
-	// Renders nothing — purely imperative
 	return null;
 });
