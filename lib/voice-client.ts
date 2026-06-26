@@ -509,18 +509,13 @@ export function createVoiceClient(): VoiceClientInstance {
 	}
 
 	function stopListening(): void {
-		// Press-twice flow: el segundo apretón del botón mic dispara audioStreamEnd
-		// para que el modelo cierre el turno del usuario inmediatamente, sin esperar
-		// al VAD automático. Solo válido cuando automatic activity detection está
-		// activo (es el default en LiveConnectConfig de Gemini).
-		if (session && store().status === "listening") {
-			try {
-				session.sendRealtimeInput({ audioStreamEnd: true });
-			} catch {
-				// Ignorar: si la sesión se cayó justo en este momento, los handlers
-				// onerror/onclose ya gestionaron el error en el store.
-			}
-		}
+		// El segundo apretón del botón mic solo CORTA el mic localmente.
+		// NO enviamos audioStreamEnd:true porque en Gemini 3.x ese flag
+		// dispara el cierre del WebSocket sin respuesta (en 2.5 funcionaba
+		// pero rompía 3.x). El VAD automático de Gemini detecta el silencio
+		// natural cuando deja de llegar audio y cierra el turno solo.
+		// Trade-off: ~0.5-1s extra de latencia para que el VAD detecte el
+		// silencio vs el cierre rápido forzado. Estabilidad > velocidad.
 
 		workletNode?.disconnect();
 		workletNode = null;
