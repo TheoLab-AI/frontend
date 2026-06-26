@@ -20,6 +20,19 @@ export default function ProtolabLayout({ children }: { children: React.ReactNode
 				crossOrigin="anonymous"
 			/>
 			<link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+			{/* Preload del GLB del robot (5MB). El browser arranca la descarga
+			    DESDE EL PRIMER INSTANTE en paralelo al HTML/JS. Cuando useGLTF
+			    haga su fetch dentro del chunk dinamico R3F, el archivo ya esta
+			    en el HTTP cache → cero espera. crossOrigin=anonymous es
+			    obligatorio para que el preload sea reusado (sin esto el browser
+			    descarga 2 veces: una por preload, otra por useGLTF). */}
+			<link
+				rel="preload"
+				href="/models/robot-mixamo-v2.glb"
+				as="fetch"
+				type="model/gltf-binary"
+				crossOrigin="anonymous"
+			/>
 			{children}
 		</>
 	);

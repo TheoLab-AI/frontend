@@ -31,20 +31,30 @@ const RobotScene = dynamic(
 	() => import("@/components/protolab/RobotScene").then((m) => m.RobotScene),
 	{
 		ssr: false,
-		// Fallback minimal y sobrio mientras descarga el chunk R3F + GLB.
-		// El BeamsBackground + BackgroundAura + ProtolabAmbience ya estan visibles
-		// (viven fuera del dynamic), asi que el usuario ve el fondo cinematico
-		// completo desde el primer frame. Solo este punto dorado pulsante ocupa
-		// el espacio donde llegara el robot, sin pantalla vacia ni texto pesado.
+		// Fallback mientras descarga el chunk R3F + GLB. El BeamsBackground +
+		// BackgroundAura + ProtolabAmbience ya estan visibles (viven fuera del
+		// dynamic), asi que el usuario ve el fondo cinematico completo desde el
+		// primer frame. Indicador mas prominente (anillo orbitando un nucleo
+		// dorado) para que se sienta "vivo" mientras llega el modelo 3D.
 		loading: () => (
 			<div className="flex h-full w-full items-center justify-center">
-				<div className="flex flex-col items-center gap-3">
-					<div
-						className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-gold)]"
-						style={{ boxShadow: "0 0 18px var(--color-gold)" }}
-					/>
-					<p className="text-mono text-[0.625rem] uppercase tracking-[0.22em] text-[var(--color-alabaster)]/40">
-						Iniciando
+				<div className="flex flex-col items-center gap-5">
+					<div className="relative h-16 w-16">
+						<div
+							className="absolute inset-0 animate-spin rounded-full border-2 border-transparent"
+							style={{
+								borderTopColor: "var(--color-gold)",
+								borderRightColor: "color-mix(in oklab, var(--color-gold) 30%, transparent)",
+								animationDuration: "1.4s",
+							}}
+						/>
+						<div
+							className="absolute inset-[26%] animate-pulse rounded-full bg-[var(--color-gold)]"
+							style={{ boxShadow: "0 0 24px var(--color-gold)" }}
+						/>
+					</div>
+					<p className="text-mono text-[0.6875rem] uppercase tracking-[0.24em] text-[var(--color-alabaster)]/55">
+						Cargando modelo
 					</p>
 				</div>
 			</div>
