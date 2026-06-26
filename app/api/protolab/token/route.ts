@@ -29,27 +29,21 @@ function buildLiveConfig(params: {
 	languageCode: string;
 }): LiveConnectConfig {
 	const { modelId, systemInstruction, voiceName, languageCode } = params;
-	const isV3 = isV3LiveModel(modelId);
-
 	const cfg: LiveConnectConfig = {
 		responseModalities: [Modality.AUDIO],
 		systemInstruction,
-		inputAudioTranscription: {},
-		outputAudioTranscription: {},
-	};
-
-	// Features exclusivas de modelos 2.5 native audio. 3.x las rechaza:
-	//   - enableAffectiveDialog: doc oficial dice "not supported in 3.1 Flash Live".
-	//   - speechConfig con voiceName "Charon": Charon es voz 2.5 native audio.
-	//     3.x cierra el WebSocket sin reason cuando recibe Charon → usar default.
-	if (!isV3) {
-		cfg.enableAffectiveDialog = true;
-		cfg.speechConfig = {
+		speechConfig: {
 			languageCode,
 			voiceConfig: {
 				prebuiltVoiceConfig: { voiceName },
 			},
-		};
+		},
+		inputAudioTranscription: {},
+		outputAudioTranscription: {},
+	};
+	// Affective dialog: solo modelos 2.5 native audio. 3.x lo rechaza.
+	if (!isV3LiveModel(modelId)) {
+		cfg.enableAffectiveDialog = true;
 	}
 	return cfg;
 }
