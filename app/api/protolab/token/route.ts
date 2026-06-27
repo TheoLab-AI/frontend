@@ -29,7 +29,30 @@ function buildLiveConfig(params: {
 	languageCode: string;
 }): LiveConnectConfig {
 	const { modelId, systemInstruction, voiceName, languageCode } = params;
-	const cfg: LiveConnectConfig = {
+
+	// Modelos 3.x Live: config minimo alineado al ejemplo oficial de la doc.
+	// La doc explicitamente dice que native audio "automatically choose the
+	// appropriate language and don't support explicitly setting the language
+	// code", asi que NO enviamos languageCode. Si enviamos solo voiceName en
+	// voiceConfig, la doc dice que los modelos audio nativo "support any of
+	// the voices available for our Text-to-Speech (TTS) models" — por eso
+	// intentamos fijar la voz aqui sin tocar languageCode.
+	// Trade-off: sin transcripciones de UI en 3.x (audio si reproduce).
+	if (isV3LiveModel(modelId)) {
+		return {
+			responseModalities: [Modality.AUDIO],
+			systemInstruction,
+			speechConfig: {
+				voiceConfig: {
+					prebuiltVoiceConfig: { voiceName },
+				},
+			},
+		};
+	}
+
+	// Modelos 2.5 native audio: config completo con voz Charon, languageCode
+	// es-US, transcripciones para UI, y enableAffectiveDialog (solo 2.5).
+	return {
 		responseModalities: [Modality.AUDIO],
 		systemInstruction,
 		speechConfig: {
@@ -40,12 +63,8 @@ function buildLiveConfig(params: {
 		},
 		inputAudioTranscription: {},
 		outputAudioTranscription: {},
+		enableAffectiveDialog: true,
 	};
-	// Affective dialog: solo modelos 2.5 native audio. 3.x lo rechaza.
-	if (!isV3LiveModel(modelId)) {
-		cfg.enableAffectiveDialog = true;
-	}
-	return cfg;
 }
 
 export async function POST(): Promise<NextResponse> {

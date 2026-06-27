@@ -82,7 +82,7 @@ export function IntroDialog(): ReactElement | null {
 						>
 							1
 						</span>
-						<span>Pulse el botón del micrófono una vez para empezar a hablar.</span>
+						<span>Pulse el botón del micrófono para empezar.</span>
 					</li>
 					<li className="flex gap-3">
 						<span
@@ -91,7 +91,9 @@ export function IntroDialog(): ReactElement | null {
 						>
 							2
 						</span>
-						<span>Diga su pregunta como se la diría a un consultor. Sin formalismos.</span>
+						<span>
+							Hable con naturalidad. Teo escucha y responde sin que usted marque el fin del turno.
+						</span>
 					</li>
 					<li className="flex gap-3">
 						<span
@@ -101,9 +103,18 @@ export function IntroDialog(): ReactElement | null {
 							3
 						</span>
 						<span>
-							Pulse el botón <strong className="text-[var(--color-alabaster)]">otra vez</strong>{" "}
-							para cerrar su turno. Teo le responderá.
+							Para silenciar el micrófono mientras haya ruido cercano, pulse el botón otra vez.
+							Vuelva a pulsar para reactivar.
 						</span>
+					</li>
+					<li className="flex gap-3">
+						<span
+							aria-hidden="true"
+							className="mt-[2px] inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-gold)]/40 text-mono text-[0.75rem] text-[var(--color-gold)]"
+						>
+							4
+						</span>
+						<span>Puede interrumpir a Teo hablando encima de él en cualquier momento.</span>
 					</li>
 				</ol>
 

@@ -260,6 +260,12 @@ export function createVoiceClient(): VoiceClientInstance {
 	// audio will finish so we can chain chunks without gaps.
 	let nextStartTime = 0;
 
+	// Tracking de sources programados/sonando para barge-in.
+	// La doc oficial dice: "When VAD detects an interruption, the ongoing
+	// generation is canceled and discarded." Para descartar el audio en
+	// cola necesitamos referencias a los nodos vivos.
+	const activeSources = new Set<AudioBufferSourceNode>();
+
 	function scheduleOutputChunk(base64: string): void {
 		if (!audioCtx || !analyserNode) return;
 
@@ -276,6 +282,11 @@ export function createVoiceClient(): VoiceClientInstance {
 		source.start(startAt);
 		nextStartTime = startAt + buffer.duration;
 
+		activeSources.add(source);
+		source.onended = () => {
+			activeSources.delete(source);
+		};
+
 		// Flip status to 'speaking' on first chunk
 		if (store().status !== "speaking") {
 			store().setStatus("speaking");
@@ -290,6 +301,29 @@ export function createVoiceClient(): VoiceClientInstance {
 			}
 			drainTimer = null;
 		}, SPEAKING_DRAIN_TIMEOUT_MS);
+	}
+
+	// Barge-in: el usuario hablo encima del modelo. Descartamos todo audio
+	// en cola para que la respuesta no siga sonando despues de la interrupcion.
+	function cancelOutputQueue(): void {
+		for (const source of activeSources) {
+			try {
+				source.stop();
+			} catch {
+				// Source ya termino o nunca arranco — ignorar.
+			}
+		}
+		activeSources.clear();
+		if (audioCtx) {
+			nextStartTime = audioCtx.currentTime;
+		}
+		if (drainTimer !== null) {
+			clearTimeout(drainTimer);
+			drainTimer = null;
+		}
+		if (store().status === "speaking") {
+			store().setStatus("idle");
+		}
 	}
 
 	// -------------------------------------------------------------------
@@ -320,6 +354,15 @@ export function createVoiceClient(): VoiceClientInstance {
 	function handleServerMessage(msg: import("@google/genai").LiveServerMessage): void {
 		const content = msg.serverContent;
 		if (!content) return;
+
+		// Barge-in: el VAD detecto que el usuario hablo encima del modelo.
+		// Doc: "When VAD detects an interruption, the ongoing generation is
+		// canceled and discarded." Hay que descartar el audio en cola para no
+		// seguir reproduciendo la respuesta vieja despues de la interrupcion.
+		if (content.interrupted === true) {
+			cancelOutputQueue();
+			return;
+		}
 
 		// Output transcription (the Archivist's response text, streamed)
 		if (content.outputTranscription?.text) {
@@ -443,6 +486,17 @@ export function createVoiceClient(): VoiceClientInstance {
 			return;
 		}
 
+		// Unmute: si ya creamos el mic stream antes y stopListening lo dejo
+		// muteado (track.enabled=false), aqui solo lo reactivamos. Asi no
+		// re-pedimos permiso ni re-creamos el audio graph en cada toggle.
+		if (micStream) {
+			for (const track of micStream.getTracks()) {
+				track.enabled = true;
+			}
+			store().setStatus("listening");
+			return;
+		}
+
 		// Check browser support
 		if (!navigator.mediaDevices?.getUserMedia) {
 			store().setError(
@@ -509,19 +563,29 @@ export function createVoiceClient(): VoiceClientInstance {
 	}
 
 	function stopListening(): void {
-		// Press-twice flow: el segundo apretón del botón mic dispara audioStreamEnd
-		// para que el modelo cierre el turno del usuario inmediatamente, sin esperar
-		// al VAD automático. Solo válido cuando automatic activity detection está
-		// activo (es el default en LiveConnectConfig de Gemini).
-		if (session && store().status === "listening") {
-			try {
-				session.sendRealtimeInput({ audioStreamEnd: true });
-			} catch {
-				// Ignorar: si la sesión se cayó justo en este momento, los handlers
-				// onerror/onclose ya gestionaron el error en el store.
+		// Mute local: deshabilitamos el track del mic en vez de destruir el
+		// stream. El boton mic pasa a ser un toggle mute/unmute coherente:
+		// stop = mute, start otra vez = unmute. No re-pedimos permiso ni
+		// reconstruimos worklet/AudioContext. El stream completo se libera
+		// solo en disconnect (component unmount).
+		// El modelo, con VAD automatico, interpreta la ausencia de audio como
+		// silencio (fin de turno o pausa natural).
+		if (micStream) {
+			for (const track of micStream.getTracks()) {
+				track.enabled = false;
 			}
 		}
+		if (store().status === "listening") {
+			store().setStatus("idle");
+		}
+	}
 
+	function disconnect(): void {
+		disconnected = true;
+
+		// Cleanup full del mic stream y audio graph. A diferencia de stopListening
+		// (que solo mutea), aqui si destruimos todo porque el componente esta
+		// haciendo unmount o el usuario pidio reconnect.
 		workletNode?.disconnect();
 		workletNode = null;
 		micSourceNode?.disconnect();
@@ -535,11 +599,7 @@ export function createVoiceClient(): VoiceClientInstance {
 		if (store().status === "listening") {
 			store().setStatus("idle");
 		}
-	}
 
-	function disconnect(): void {
-		disconnected = true;
-		stopListening();
 		stopLevelPolling();
 		if (drainTimer !== null) {
 			clearTimeout(drainTimer);
